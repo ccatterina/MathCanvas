@@ -1,0 +1,249 @@
+<!--
+  Copyright 2015 Claudio Catterina
+  distribuito secondo i termini della Licenza Pubblica Generica GNU
+  
+  This file is part of AnimazioniDerivataIntegrale.
+
+  AnimazioniDerivataIntegrale is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  AnimazioniDerivataIntegrale is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with AnimazioniDerivataIntegrale.  If not, see <http://www.gnu.org/licenses/>
+-->
+<html>
+  <head>
+    <script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="bootstrap-3.3.5-dist/js/bootstrap.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="bootstrap-3.3.5-dist/css/bootstrap.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="bootstrap-3.3.5-dist/css/bootstrap-theme.css">
+    <script type="text/javascript" src="js-expression-eval-master/parser.js"></script>
+    <script type="text/javascript" src="DrawUtilities.js"></script>
+    <script type="text/javascript" src="Function.js"></script>
+    <script type="text/javascript" src="Animation.js"></script>
+    <script type="text/javascript" src="Interactive.js"></script>
+    <script>
+        
+        const WIDTH=600;
+        const HEIGHT=250;
+        const TIME=20;
+        var globalaxes;
+        var globalfunc;
+        var globalaxes_2;
+        var callID=0;
+        var end_time=0;
+        /**
+         * crea ed inserisce i canvas necessari nel body
+         */
+        function insertCanvas(){
+          createCanvas("Function",WIDTH,HEIGHT,0,10,"visible");
+          createCanvas("Buffer",WIDTH,HEIGHT,0,10,"hidden");
+          createCanvas("ModifiedFunction",WIDTH,HEIGHT,HEIGHT+20,10,"visible");
+          createCanvas("ModifiedFunctionForeground",WIDTH,HEIGHT,HEIGHT+20,10,"visible");
+          createCanvas("BackgroundFunction",WIDTH,HEIGHT,0,10,"visible");
+          createCanvas("Circle",WIDTH,HEIGHT,0,10,"visible");
+        }
+        /**
+         * crea l'animazione al variare della posizione del mouse sul canvas
+         * @param  {int} x posizione x del mouse relativa al canvas
+         * @param  {int} y posizione y del mouse relativa al canvas
+         */
+        function drawInteractive(x,y){
+          var cpositivo=rgb(0,128,255);
+          var cnegativo=rgb(255,51,51);
+          xx=x+globalaxes.xmin_px; 
+          ctx=document.getElementById("Function").getContext("2d");
+          ctx.beginPath();
+          ctx.clearRect(0,0,WIDTH,HEIGHT);
+          ctx.stroke();
+          ctx.lineWidth=2;
+          //derivata nel punto i (f(i+0.00001)-f(i))/0.00001
+          var derivative=(Parser.evaluate(globalfunc, { x: xx/globalaxes.scale_x+0.0000001 }) - Parser.evaluate(globalfunc, { x: xx/globalaxes.scale_x }))/0.0000001;     
+          //coefficiente angolare della retta tangente nel punto i     
+          var m=derivative; 
+          //coefficiente q della retta tangente nel punto i
+          var q=Parser.evaluate(globalfunc, { x: xx/globalaxes.scale_x })- derivative*xx/globalaxes.scale_x;  
+          ctx.beginPath();
+          //scelgo il colore della punto della funzione derivata in base alla positivita/negativita della funzione
+          ctx.strokeStyle=derivative>0?cpositivo:cnegativo; 
+          //disegno la retta tangente
+          ctx.moveTo(((globalaxes.ymin-q)/m)*globalaxes.scale_x-globalaxes.xmin_px,HEIGHT);
+          ctx.lineTo(((globalaxes.ymax-q)/m)*globalaxes.scale_x-globalaxes.xmin_px,0);
+          ctx.stroke();
+          ctx.closePath();
+          ctx.beginPath(); 
+          ctx.arc(xx-globalaxes.xmin_px,HEIGHT-globalaxes.ymin_px-globalaxes.scale_y*Parser.evaluate(globalfunc, { x: xx/globalaxes.scale_x }),5,0,2*Math.PI);
+          ctx.fill();
+          ctx.closePath();
+          var ctxDer=document.getElementById("ModifiedFunctionForeground").getContext("2d");
+          //valore della derivata moltiplicata per la scala (in pixel)
+          var scale_xd_derivative=globalaxes_2.scale_y*(Parser.evaluate(globalfunc, { x: xx/globalaxes.scale_x+0.00001 }) - Parser.evaluate(globalfunc, { x: xx/globalaxes.scale_x }))/0.00001;
+          ctxDer.clearRect(0,0,WIDTH,HEIGHT);
+          //scelgo il colore della punto della funzione derivata in base alla positivita/negativita della funzione
+          ctxDer.fillStyle = scale_xd_derivative>0?cpositivo:cnegativo;       
+          ctxDer.beginPath();
+          ctxDer.arc(xx-globalaxes.xmin_px,HEIGHT-globalaxes_2.ymin_px-scale_xd_derivative,6,0,2*Math.PI);
+          ctxDer.fill();
+        }
+        /**
+         * controllo dati, preparazione e avvio dell'animazione
+         */
+        function init()
+        {
+          var xmin=parseFloat($("#xmin").val());
+          var xmax=parseFloat($("#xmax").val());
+          var ymin=parseFloat($("#ymin").val());
+          var ymax=parseFloat($("#ymax").val());
+          var ymin_2=parseFloat($("#ymin_2")===undefined?NaN:$("#ymin_2").val());
+          var ymax_2=parseFloat($("#ymax_2")===undefined?NaN:$("#ymax_2").val());
+          var fx=$("#function").val();
+          var error=false;
+          if (xmin<-1000 || xmax>1000 || ymin<-1000 || ymax>1000)  displayAlert("min_max");else{
+            try{
+              (Parser.evaluate(fx,{x:0}));
+            }
+            catch(err){
+              error=true;
+            }
+            if (error) displayAlert("function");else{
+              if(xmax-xmin<=0)displayAlert("axes");else{
+                document.getElementById("alert").innerHTML="";
+          	  	document.getElementById("BackgroundFunction").getContext("2d").clearRect(0,0,WIDTH,HEIGHT);
+          	  	document.getElementById("Circle").getContext("2d").clearRect(0,0,WIDTH,HEIGHT);
+          	  	document.getElementById("ModifiedFunction").getContext("2d").clearRect(0,0,WIDTH,HEIGHT);
+                document.getElementById("ModifiedFunctionForeground").getContext("2d").clearRect(0,0,WIDTH,HEIGHT);
+              	document.getElementById("Function").getContext("2d").clearRect(0,0,WIDTH,HEIGHT);
+              	document.getElementById("Buffer").getContext("2d").clearRect(0,0,WIDTH,HEIGHT);       	  
+            	  var back_canvas=document.getElementById("BackgroundFunction");
+            	  var axes=defineAxes(xmin,xmax,ymin,ymax);
+                var ctx=back_canvas.getContext("2d");
+                var dom=drawFunc(ctx,axes,fx,"rgb(0,0,0)",3);         	  
+                var codom=studyDerivative(fx,axes,dom);
+                if (codom.min<1 && codom.min>-1)
+                  decimal=getDecimal(codom.min);
+                else
+                  decimal=0;
+                codom.min=Math.floor(codom.min/Math.pow(10,decimal))/(Math.pow(10,decimal));
+                if (codom.max<1 && codom.max>-1)
+                  decimal=getDecimal(codom.max);
+                else
+                  decimal=0;
+                codom.max=Math.ceil(codom.max/Math.pow(10,decimal))/(Math.pow(10,decimal));
+                codom.min=codom.min>0?codom.min/2:codom.min*2;
+                codom.max=codom.max<0?codom.max/2:codom.max*2;
+                if (isNaN(ymax_2) || isNaN(ymin_2))
+                  var axes_2=defineAxes(xmin,xmax,codom.min,codom.max);
+                else
+                  var axes_2=defineAxes(xmin,xmax,ymin_2,ymax_2);
+            	  drawAxes(ctx,axes,1); 
+            	  
+                ctx=document.getElementById("ModifiedFunction").getContext("2d");
+                drawAxes(ctx,axes_2,1); 
+                globalaxes=axes;
+                globalfunc=fx;
+                globalaxes_2=axes_2;
+                 $("#start").prop("disabled", true);
+                if (px_counter>dom.last_pixel-dom.first_pixel+10){
+                  clearInterval(callID);
+                  document.getElementById("Circle").removeEventListener("mousemove", getPosition, false);
+                  document.getElementById("Circle").removeEventListener("mousedown", getPosition, false);
+                }
+                callID=setInterval(draw,TIME,axes,fx,dom,axes_2);
+                px_counter=-1;
+              }
+            }
+          }
+        }
+        /**
+         * Disegna i frame dell'animazione
+         * @param  {Axes} axes     Assi della funzione
+         * @param  {String} fx     funzione 
+         * @param  {Dom} dom      Dominio della funzione
+         * @param  {Axes} axes_2   assi della funzione integrale
+         */
+        function draw(axes,fx,dom,axes_2) 
+        {
+          px_counter++;
+          var canvas_mfunction = document.getElementById("ModifiedFunction");
+          var canvas_circle = document.getElementById("Circle");
+          var canvas_function = document.getElementById("Function");
+          var canvas_buffer = document.getElementById("Buffer");
+          if (canvas_function.style.visibility=='hidden')
+            var canvas_to_use=canvas_function;
+          else
+            var canvas_to_use=canvas_buffer;
+          if (null==canvas_to_use || !canvas_to_use.getContext) return;
+          var ctx=canvas_to_use.getContext("2d");
+          if (px_counter<dom.last_pixel-dom.first_pixel+10)
+          {  
+       		  drawXPoint(canvas_circle,axes,fx,dom);
+            drawSign(canvas_mfunction.getContext("2d"),ctx,axes,fx,dom,axes_2); //qui chiamo una delle funzioni drawDerivative,drawSign,drawIntegral,drawImproperIntegral. 
+            flipCanvas(canvas_function,canvas_buffer); 
+          }
+          else{
+          	$("#start").prop("disabled", false); 
+            document.getElementById("Circle").addEventListener("mousemove", getPosition, false);
+            document.getElementById("Circle").addEventListener("mousedown", getPosition, false);
+          }
+        }     
+        </script>
+  </head>
+  <body onload="insertCanvas()">
+    <ul class="nav nav-tabs" id="menu">
+  	  <li role="presentation"><a href="index.html"><b>PRESENTAZIONE</b></a></li>
+      <li role="presentation"><a href="rapporto_incrementale.html">Rapporto Incrementale</a></li>
+      <li role="presentation"><a href="derivata.html">Derivata</a></li> 
+      <li role="presentation" class="active"><a href="segno.html">Segno della derivata</a></li>
+      <li role="presentation"><a href="integrale.html">Funzione Integrale</a></li>
+      <li role="presentation"><a href="integrale_improprio.html">Integrale Improrio</a></li>
+    	</ul>
+  	<div id="container" style="padding:20px;">
+      <div class="row">
+        <div id="alert" ></div>
+        <div class="well">
+           L'animazione mostra la corrispondenza tra crescenza/decrescenza della funzione (grafico in alto) con il segno della sua funzione derivata (grafico in basso). (Una volta finita l'animazione e' possibile interagire muovendo il mouse sul disegno della funzione)
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-2" id="col1">
+          <div class="panel panel-default" >
+            <div class="panel-body">
+        	  	<div class="form-group" id="form">
+        	  		<label for="function">Funzione:</label>
+                <input type="text" id="function" value="sin(3*x)" class="form-control" >
+                <label for="xmin">X-min:</label>
+                <input type="number" id="xmin" value="-5" step="0.01" class="form-control" min="-1000">
+                <label for="xmax">X-max:</label>
+                <input type="number" id="xmax" value="5" step="0.01" class="form-control" max="1000">
+                 <label for="ymin">Y-min:</label>
+                <input type="number" id="ymin" value="-2.5" step="0.01" class="form-control" min="-1000">
+                <label for="ymax">Y-max:</label>
+                <input type="number" id="ymax" value="2.5" step="0.01" class="form-control" max="1000">
+                <div class="checkbox">
+                  <label><input type="checkbox" id="check_man_axes" value="" onChange="showManAxes()">Inserisci manualmente Y-min e Y-max per il secondo grafico.</label>
+                </div>
+                <div id="manual_axes"></div>
+                <br>
+                <input type="submit" value="disegna" onclick="init()" class="btn btn-default"  id="start">
+        	  	</div>
+            </div>
+          </div>
+        </div> 
+        <div class="col-md-8" id="canvas_div">
+        </div>
+    	</div>
+    </div>
+    <div style="position:fixed;bottom:0;left:0;background-color: rgba(225, 223, 223, 1);heigth:40cpx;width:100%;z-index:1000;text-align:center;">
+          Copyright 2015 Claudio Catterina - distribuito secondo i termini della <a href="COPYING">Licenza Pubblica Generica GNU</a>
+    </div>
+  </body>
+</html>      
