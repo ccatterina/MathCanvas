@@ -12,10 +12,10 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-
+    "target": "ES6",
     "importsNotUsedAsValues": "error",
     "checkJs": true,
-
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
