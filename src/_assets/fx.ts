@@ -1,4 +1,4 @@
-import math from 'mathjs'
+import { evaluate } from 'mathjs'
 
 export type Domain = { from: number | null; to?: number | null }[]
 
@@ -106,8 +106,8 @@ export class Fx {
     for (let x_px = 0; x_px <= numPoints; x_px++) {
       const last_domain_part = domain[domain.length - 1]
 
-      const x = (x_px + this.xMin) / this.xInterval
-      const y = math.evaluate(this.fx, { x })
+      const x = (x_px * this.xInterval) / numPoints + this.xMin
+      const y = evaluate(this.fx, { x })
 
       points.push([x, y])
 
