@@ -2,17 +2,9 @@
 layout: default
 title: Rapporto Incrementale
 slug: incremental_ratio
+instructions: L'animazione mostra il concetto di derivata prima come limite del rapporto incrementale. (Una volta finita l'animazione e' possibile interagire muovendo il mouse sul disegno della funzione)
 ---
-<div class="row">
-    <div class="alert alert-danger alert-dismissible d-none" id="alert" role="alert">
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        <strong><span id="error"></span></strong>
-    </div>
-    <div class="card card-body bg-light">
-        L'animazione mostra il concetto di derivata prima come limite del rapporto incrementale. (Una volta finita
-        l'animazione e' possibile interagire muovendo il mouse sul disegno della funzione)
-    </div>
-</div>
+{% include errors_and_instructions.html %}
 <div class="row pt-4">
     <div class="card card-body col-md-3">
         <div class="form-group" id="form">
