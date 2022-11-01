@@ -20,11 +20,12 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
     <title>{{ page.title }}</title>
     <link href="{{ site.baseurl }}/assets/main.css" rel="stylesheet">
   </head>
-  <body>
+  <body class="d-flex flex-column min-vh-100">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="/index.html">MathCanvas</a>
@@ -58,8 +59,8 @@
     <section class='container py-5'>
       {{ content }}
     </section>
-    <footer>
-        <div class="text-center p-4 bg-light" style="position:fixed;bottom:0;left:0;right:0;">
+    <footer class="mt-auto">
+        <div class="text-center p-4 bg-light" >
             © Copyright 2022 - 
             <a class="text-reset fw-bold" href="https://claudiocatterina.it/">Claudio Catterina</a>
             - distribuito secondo i termini della <a href="/COPYING">Licenza Pubblica Generica GNU</a>
