@@ -38,7 +38,7 @@ export function drawFxAxes(ctx: CanvasRenderingContext2D, fx: Fx) {
   ctx.stroke()
 
   // Draw x-axis steps
-  let d = Math.floor(Math.log10(fx.xInterval))
+  let d = -Math.floor(Math.log10(fx.xInterval))
   const xStep =
     d >= 0
       ? Math.ceil((fx.xInterval / 10) * Math.pow(10, d)) / Math.pow(10, d)
@@ -57,7 +57,7 @@ export function drawFxAxes(ctx: CanvasRenderingContext2D, fx: Fx) {
   }
 
   // Draw y-axis steps
-  d = Math.floor(Math.log10(fx.yInterval))
+  d = -Math.floor(Math.log10(fx.yInterval))
   const yStep =
     d >= 0
       ? Math.ceil((fx.yInterval / 10) * Math.pow(10, d)) / Math.pow(10, d)
@@ -72,7 +72,7 @@ export function drawFxAxes(ctx: CanvasRenderingContext2D, fx: Fx) {
     ctx.stroke()
     ctx.fillText(currentYStep.toString(), OrigX_px + 5, currentYStep_px - 4)
     ctx.fill()
-    currentYStep += xStep
+    currentYStep += yStep
   }
   ctx.closePath()
 }
