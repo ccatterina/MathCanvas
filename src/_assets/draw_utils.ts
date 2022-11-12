@@ -105,18 +105,19 @@ export function drawFxPoints(fx: Fx, ctx: CanvasRenderingContext2D) {
   }
 }
 
-
 export function drawPoint(
   fx: Fx,
   x: number,
   y: number,
   ctx: CanvasRenderingContext2D,
-  options: { color?: string; size?: number } = {}
+  options: { color?: string; radius?: number } = {}
 ) {
-  ctx.strokeStyle = options.color || 'black'
-  const size = options.size || 2 * Math.PI
+  const sAngle = 0
+  const eAngle = 2 * Math.PI
+  const radius = options.radius || 5
   ctx.beginPath()
-  ctx.arc(XToPx(fx, x, ctx), YToPx(fx, y, ctx), 5, 0, size)
+  ctx.fillStyle = options.color || 'black'
+  ctx.arc(XToPx(fx, x, ctx), YToPx(fx, y, ctx), radius, sAngle, eAngle)
   ctx.fill()
   ctx.closePath()
 }
