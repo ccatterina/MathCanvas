@@ -1,6 +1,7 @@
 import { displayAlert } from './utils'
 import { FxChart } from './fx_chart'
 import { evaluate } from 'mathjs'
+import { derivativeMinMax } from './derivative'
 
 declare global {
   interface Window {
@@ -8,36 +9,6 @@ declare global {
     fx2: FxChart
     animationTimerId: NodeJS.Timer
   }
-}
-
-export function derivativeMinMax(
-  fx: FxChart,
-  ctx: CanvasRenderingContext2D
-): [number, number] {
-  if (!fx.domain) {
-    fx.evaluate()
-  }
-
-  const domPiecesMinMax: [number, number][] = fx.domain!.map((dom) => {
-    let min = Infinity
-    let max = -Infinity
-    const fromPx = fx.XToPx(dom.from || fx.xMin, ctx)
-    const toPx = fx.XToPx(dom.to || fx.xMax, ctx)
-    for (let x_px = fromPx; x_px <= toPx; x_px++) {
-      const x = fx.XFromPx(x_px, ctx)
-      const eps = fx.xInterval * 1e-10
-      // https://en.wikipedia.org/wiki/Differentiation_rules
-      const d = (evaluate(fx.fx, { x: x + eps }) - evaluate(fx.fx, { x })) / eps
-      min = Math.min(min, d)
-      max = Math.max(max, d)
-    }
-    return [min, max]
-  })
-
-  return [
-    Math.min(...domPiecesMinMax.map((d) => d[0])),
-    Math.max(...domPiecesMinMax.map((d) => d[1]))
-  ]
 }
 
 function getCoordinatesAndDrawInteraction(event: MouseEvent) {
@@ -196,13 +167,14 @@ function drawAnimation(animationPx: number) {
 
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
-    let r = Math.round((animationPx / ctx.canvas.width) * 255)
-    const color = `rgb(${r}, 10, 100)`
+    const positiveColor = 'rgb(0, 128, 255)'
+    const negativeColor = 'rgb(255, 51, 51)'
 
     const x = fx.XFromPx(animationPx, ctx)
     const eps = fx.xInterval * 1e-10
     // https://en.wikipedia.org/wiki/Differentiation_rules
     const der = (evaluate(fx.fx, { x: x + eps }) - evaluate(fx.fx, { x })) / eps
+    const color = der >= 0 ? positiveColor : negativeColor
 
     // Draw tangent line to fx at x
     ctx.beginPath()
@@ -240,14 +212,15 @@ function drawInteraction(x_px: number) {
   }
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
   int2Ctx.clearRect(0, 0, int2Ctx.canvas.width, int2Ctx.canvas.height)
-
-  const r = Math.round((x_px / ctx.canvas.width) * 255)
-  const color = `rgb(${r}, 10, 100)`
+  const positiveColor = 'rgb(0, 128, 255)'
+  const negativeColor = 'rgb(255, 51, 51)'
 
   const x = fx.XFromPx(x_px, ctx)
   const eps = fx.xInterval * 1e-10
   // https://en.wikipedia.org/wiki/Differentiation_rules
   const der = (evaluate(fx.fx, { x: x + eps }) - evaluate(fx.fx, { x })) / eps
+
+  const color = der >= 0 ? positiveColor : negativeColor
 
   // Draw tangent line to fx at x
   ctx.beginPath()
