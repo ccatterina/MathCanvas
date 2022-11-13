@@ -29,9 +29,11 @@
     "typescript": "^4.8.3",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
-    "webpack-copy-plugin": "^0.0.4"
+    "webpack-copy-plugin": "^0.0.4",
+    "webpack-dev-server": "^4.11.1",
+    "webpack-merge": "^5.8.0"
   },
   "scripts": {
-    "dev": "rimraf ./_site && concurrently \"webpack --watch \" \"bundle exec jekyll serve\""
+    "dev": "rimraf ./_site && concurrently \"webpack-dev-server --config webpack.dev.js \" \"bundle exec jekyll serve --config _config.yml,_config.dev.yml\""
   }
 }

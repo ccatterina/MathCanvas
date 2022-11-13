@@ -1,10 +1,9 @@
-const path = require("path");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
+const path = require('path')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
   entry: './src/_assets/index.ts',
-  devtool: 'inline-source-map',
   output: {
     path: path.resolve(__dirname, '_site/assets'),
     filename: 'bundle.js',
@@ -58,6 +57,5 @@ module.exports = {
   ],
   resolve: {
     extensions: ['.tsx', '.ts', '.js']
-  },
-  mode: 'development'
+  }
 }
