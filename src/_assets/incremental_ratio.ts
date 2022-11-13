@@ -1,18 +1,10 @@
 import { displayAlert } from './utils'
-import {
-  XToPx,
-  YToPx,
-  drawFxAxes,
-  drawFxPoints,
-  XFromPx,
-  drawPoint
-} from './draw_utils'
-import { Fx } from './fx'
 import { evaluate } from 'mathjs'
+import { FxChart } from './fx_chart'
 
 declare global {
   interface Window {
-    fx: Fx
+    fx: FxChart
     xFixed: number
     xMoving: number
     animationTimerId: NodeJS.Timer
@@ -76,17 +68,18 @@ export function init() {
   animCtx.clearRect(0, 0, animCtx.canvas.width, animCtx.canvas.height)
   bufferCtx.clearRect(0, 0, bufferCtx.canvas.width, bufferCtx.canvas.height)
 
-  const fx = new Fx(func, xMin, xMax, yMin, yMax)
+  const resolution: [number, number] = [fxCtx.canvas.width, fxCtx.canvas.height]
+  const fx = new FxChart(func, xMin, xMax, yMin, yMax, resolution)
 
   window.fx = fx
   window.xFixed = xFixed
   window.xMoving = xMoving
 
-  drawFxAxes(fxCtx, fx)
+  fx.drawFxAxes(fxCtx)
   drawX0OnAxes(xFixed, fx, fxCtx)
 
-  fx.evaluate(fxCtx.canvas.width)
-  drawFxPoints(fx, fxCtx)
+  fx.evaluate()
+  fx.drawFxPoints(fxCtx)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
@@ -159,8 +152,8 @@ export function drawAnimation(animationPx: number) {
   const color = `rgb(${r}, 10, 100)`
 
   drawLineBetweeen(fx, xFixed, yFixed, xMoving, yMoving, ctx, { color })
-  drawPoint(fx, xMoving, yMoving, ctx)
-  drawPoint(fx, xFixed, yFixed, ctx)
+  fx.drawPoint(xMoving, yMoving, ctx)
+  fx.drawPoint(xFixed, yFixed, ctx)
 
   animCanvas.classList.toggle('invisible')
   buffCanvas.classList.toggle('invisible')
@@ -180,7 +173,7 @@ export function drawInteraction(x: number) {
   }
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
-  const xMoving = XFromPx(fx, x, ctx)
+  const xMoving = fx.XFromPx(x, ctx)
 
   const yFixed = evaluate(fx.fx, { x: xFixed })
   const yMoving = evaluate(fx.fx, { x: xMoving })
@@ -191,12 +184,12 @@ export function drawInteraction(x: number) {
   const color = `rgb(${r}, 10, 100)`
 
   drawLineBetweeen(fx, xFixed, yFixed, xMoving, yMoving, ctx, { color })
-  drawPoint(fx, xMoving, yMoving, ctx)
-  drawPoint(fx, xFixed, yFixed, ctx)
+  fx.drawPoint(xMoving, yMoving, ctx)
+  fx.drawPoint(xFixed, yFixed, ctx)
 }
 
 function drawLineBetweeen(
-  fx: Fx,
+  fx: FxChart,
   x0: number,
   y0: number,
   x1: number,
@@ -208,18 +201,18 @@ function drawLineBetweeen(
   ctx.strokeStyle = options.color || 'black'
   ctx.lineWidth = options.lineWidth || 2
   ctx.beginPath()
-  ctx.moveTo(0, YToPx(fx, evaluate(ftan, { x: fx.xMin }), ctx))
-  ctx.lineTo(ctx.canvas.width, YToPx(fx, evaluate(ftan, { x: fx.xMax }), ctx))
+  ctx.moveTo(0, fx.YToPx(evaluate(ftan, { x: fx.xMin }), ctx))
+  ctx.lineTo(ctx.canvas.width, fx.YToPx(evaluate(ftan, { x: fx.xMax }), ctx))
   ctx.stroke()
   ctx.closePath()
 }
 
-function drawX0OnAxes(X0: number, fx: Fx, ctx: CanvasRenderingContext2D) {
-  let X0_x = XToPx(fx, X0, ctx)
+function drawX0OnAxes(X0: number, fx: FxChart, ctx: CanvasRenderingContext2D) {
+  let X0_x = fx.XToPx(X0, ctx)
 
   let OrigY_px = ctx.canvas.height - 2 // Origin Y is outside the chart
   if (fx.yMax > 0 && fx.yMin < 0) {
-    OrigY_px = YToPx(fx, 0, ctx)
+    OrigY_px = fx.YToPx(0, ctx)
   }
 
   ctx.beginPath()
