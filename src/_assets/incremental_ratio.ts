@@ -211,10 +211,7 @@ function drawLineBetweeen(
 function drawX0OnAxes(X0: number, fx: FxChart, ctx: CanvasRenderingContext2D) {
   let X0_x = fx.XToPx(X0)
 
-  let OrigY_px = ctx.canvas.height - 2 // Origin Y is outside the chart
-  if (fx.yMax > 0 && fx.yMin < 0) {
-    OrigY_px = fx.YToPx(0)
-  }
+  const OrigY_px = fx.Y0_px || fx.resolution[1] - 2
 
   ctx.beginPath()
   ctx.fillStyle = 'black'

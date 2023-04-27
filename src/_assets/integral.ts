@@ -164,20 +164,12 @@ function drawAnimation(frame: number) {
     const color = `rgb(0,128,255)`
 
     const [x, y] = fx.points![framePx]!
-    let OrigY_px = ctx.canvas.height - 2 // Origin Y is outside the chart
-    if (fx.yMax > 0 && fx.yMin < 0) {
-      OrigY_px = fx.YToPx(0)
-    }
-    ctx.beginPath()
+    const OrigY_px = fx.Y0_px || fx.resolution[1]
 
     // Draw the area under the function 
+    ctx.beginPath()
     ctx.fillStyle = color
-    ctx.fillRect(
-      framePx,
-      OrigY_px,
-      2,
-      -(y * fx.resolution[1]) / fx.yInterval
-    )
+    ctx.fillRect(framePx, OrigY_px, 2, -(y * fx.resolution[1]) / fx.yInterval)
     ctx.fill()
 
     // Calculate the surface of the area under the function from the beginning of the chart to the `animationPx`.

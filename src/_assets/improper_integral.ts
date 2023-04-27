@@ -174,13 +174,11 @@ function drawAnimation(frame: number, integralValues: Array<number | null>, spee
 
     const pxForward = (fx.resolution[0] / 2) + framePx
     const [xForward, yForward] = fx.points![pxForward]!
-    let OrigY_px = ctx.canvas.height - 2 // Origin Y is outside the chart
-    if (fx.yMax > 0 && fx.yMin < 0) {
-      OrigY_px = fx.YToPx(0)
-    }
+    
     ctx.beginPath()
 
     // Draw the area under the function 
+    const OrigY_px = fx.Y0_px || fx.resolution[1]
     ctx.fillStyle = color
     const rectHeight = -(yForward * fx.resolution[1]) / fx.yInterval
     ctx.fillRect(pxForward, OrigY_px, 2, rectHeight)

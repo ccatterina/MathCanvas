@@ -16,6 +16,8 @@ export class FxChart {
   private _xInterval: number
   private _yInterval: number
   private _resolution: [number, number]
+  private _X0_px: number | null
+  private _Y0_px: number | null
   private _domain?: Domain | undefined
   private _isLimited?: Boolean | undefined
   private _points?: [number, number][] | undefined
@@ -64,6 +66,14 @@ export class FxChart {
     return this._resolution
   }
 
+  get X0_px() {
+    return this._X0_px
+  }
+
+  get Y0_px() {
+    return this._Y0_px
+  }
+
   constructor(
     fx: string,
     xMin: number,
@@ -80,6 +90,8 @@ export class FxChart {
     this._xInterval = xMax - xMin
     this._yInterval = yMax - yMin
     this._resolution = resolution
+    this._X0_px = (this.yMax > 0 && this.yMin < 0) ? this.XToPx(0) : null
+    this._Y0_px = (this.yMax > 0 && this.yMin < 0) ? this.YToPx(0) : null 
   }
 
   evaluate() {
@@ -120,22 +132,14 @@ export class FxChart {
     ctx.strokeStyle = this.FX_COLOR
     ctx.lineWidth = this.FX_LINE_WIDTH
 
-    // Calculate Origin y-coordinate position in px.
-    let OrigY_px = ctx.canvas.height - 2 // Origin Y is outside the chart
-    if (this.yMax > 0 && this.yMin < 0) {
-      OrigY_px = this.YToPx(0)
-    }
     // Draw x-axis
+    const OrigY_px = this.Y0_px || ctx.canvas.height - 2
     ctx.moveTo(0, OrigY_px)
     ctx.lineTo(ctx.canvas.width, OrigY_px)
     ctx.stroke()
 
-    // Calculate Origin x-coordinate position in px.
-    let OrigX_px = 2 // Origin X is outside the chart
-    if (this.xMax > 0 && this.xMin < 0) {
-      OrigX_px = this.XToPx(0)
-    }
     // Draw y-axis
+    const OrigX_px = this.X0_px || 2
     ctx.moveTo(OrigX_px, 0)
     ctx.lineTo(OrigX_px, ctx.canvas.width)
     ctx.stroke()
