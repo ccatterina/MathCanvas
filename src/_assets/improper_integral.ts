@@ -1,16 +1,17 @@
 import { displayAlert } from './utils'
-import { FxChart } from './fx_chart'
+import { Fx } from './fx'
 import { evaluate } from 'mathjs'
+import { drawFxAxes, drawFxPoint, drawFxPoints } from './canvas_utils'
 
 declare global {
   interface Window {
-    fx: FxChart
-    fx2: FxChart
+    fx: Fx
+    fx2: Fx
     animationTimerId: NodeJS.Timer
   }
 }
 
-export function studyImproperIntegral(fx: FxChart, speed: string): Array<number | null> {
+export function studyImproperIntegral(fx: Fx, speed: string): Array<number | null> {
   const values: Array<number | null> = []
   let area = 0
   const px0 = fx.XToPx(0)
@@ -100,8 +101,7 @@ export function init() {
   fxCtx2.clearRect(0, 0, fxCtx.canvas.width, fxCtx.canvas.height)
 
   const resolution: [number, number] = [fxCtx.canvas.width, fxCtx.canvas.height]
-  const fx = new FxChart(func, xMin, xMax, yMin, yMax, resolution)
-  fx.evaluate()
+  const fx = new Fx(func, resolution, xMin, xMax, yMin, yMax)
   if (!fx.isLimited) {
     displayAlert('unlimited')
     return
@@ -116,11 +116,11 @@ export function init() {
     yMax2 = max + interval / 2
   }
 
-  fx.drawFxAxes(fxCtx)
-  fx.drawFxPoints(fxCtx)
+  drawFxAxes(fxCtx, fx)
+  drawFxPoints(fxCtx, fx)
 
-  const fx2 = new FxChart(func, xMin, xMax, yMin2, yMax2, resolution)
-  fx2.drawFxAxes(fxCtx2)
+  const fx2 = new Fx(func, resolution, xMin, xMax, yMin2, yMax2)
+  drawFxAxes(fxCtx2, fx2)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
@@ -155,13 +155,10 @@ function drawAnimation(frame: number, integralValues: Array<number | null>, spee
     }
 
     const { fx, fx2 } = window
-    if (!fx.domain) {
-      fx.evaluate()
-    }
 
-    const framePx = frame + (fx.domain?.[0]?.from || 0)
+    const framePx = frame + fx.XToPx(fx.domain[0]!.from)
     if (
-      framePx * 2 >= (fx.domain![fx.domain!.length - 1]!.to || ctx.canvas.width)
+      framePx * 2 >= fx.XToPx(fx.domain![fx.domain!.length - 1]!.to)
     ) {
       const startAnimationBtn: HTMLButtonElement =
         document.querySelector('#start')!
@@ -207,7 +204,7 @@ function drawAnimation(frame: number, integralValues: Array<number | null>, spee
 
 
     if (integralValues[framePx] != null) {
-      fx2.drawPoint(xForward, integralValues[framePx] as number, fx2Ctx, { color, radius: 2 })
+      drawFxPoint(fx2Ctx, fx2, xForward, integralValues[framePx] as number, { color, radius: 2 })
     }
   }
 }

@@ -1,12 +1,13 @@
 import { displayAlert } from './utils'
-import { FxChart } from './fx_chart'
+import { Fx } from './fx'
 import { evaluate } from 'mathjs'
 import { derivativeMinMax } from './derivative'
+import { drawFxAxes, drawFxPoint, drawFxPoints } from './canvas_utils'
 
 declare global {
   interface Window {
-    fx: FxChart
-    fx2: FxChart
+    fx: Fx
+    fx2: Fx
     animationTimerId: NodeJS.Timer
   }
 }
@@ -82,8 +83,7 @@ export function init() {
   intCtx2.clearRect(0, 0, animCtx.canvas.width, animCtx.canvas.height)
 
   const resolution: [number, number] = [fxCtx.canvas.width, fxCtx.canvas.height]
-  const fx = new FxChart(func, xMin, xMax, yMin, yMax, resolution)
-  fx.evaluate()
+  const fx = new Fx(func, resolution, xMin, xMax, yMin, yMax)
 
   if (!manualYAxes || !yMin2 || !yMax2) {
     const dMinMax = derivativeMinMax(fx)
@@ -91,11 +91,11 @@ export function init() {
     yMax2 = dMinMax[1] + (dMinMax[1] - dMinMax[0]) / 2
   }
 
-  fx.drawFxAxes(fxCtx)
-  fx.drawFxPoints(fxCtx)
+  drawFxAxes(fxCtx, fx)
+  drawFxPoints(fxCtx, fx)
 
-  const fx2 = new FxChart(func, xMin, xMax, yMin2, yMax2, resolution)
-  fx2.drawFxAxes(fxCtx2)
+  const fx2 = new Fx(func, resolution, xMin, xMax, yMin2, yMax2)
+  drawFxAxes(fxCtx2, fx2)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
@@ -140,13 +140,10 @@ function drawAnimation(frame: number) {
     }
 
     const { fx, fx2 } = window
-    if (!fx.domain) {
-      fx.evaluate()
-    }
 
-    const framePx = frame + (fx.domain?.[0]?.from || 0)
+    const framePx = frame + fx.XToPx(fx.domain[0]!.from)
     if (
-      framePx >= (fx.domain![fx.domain!.length - 1]!.to || ctx.canvas.width)
+      framePx >= fx.XToPx(fx.domain![fx.domain!.length - 1]!.to)
     ) {
       const startAnimationBtn: HTMLButtonElement =
         document.querySelector('#start')!
@@ -187,10 +184,10 @@ function drawAnimation(frame: number) {
     ctx.lineTo(fx.XToPx((fx.yMax - q) / m), 0)
     ctx.stroke()
     // Draw fx(x)
-    fx.drawPoint(x, fx.points![framePx]![1]!, ctx, { radius: 6 })
+    drawFxPoint(ctx, fx, x, fx.points![framePx]![1]!, { radius: 6 })
 
     // Draw fx'(x)
-    fx2.drawPoint(x, der, fx2Ctx, { color, radius: 2 })
+    drawFxPoint(fx2Ctx, fx2, x, der, { color, radius: 2 })
 
     animCanvas.classList.toggle('invisible')
     bufferCanvas.classList.toggle('invisible')
@@ -234,8 +231,8 @@ function drawInteraction(x_px: number) {
   ctx.stroke()
 
   // Draw fx(x)
-  fx.drawPoint(x, fx.points![x_px]![1]!, ctx, { radius: 6 })
+  drawFxPoint(ctx, fx, x, fx.points![x_px]![1]!, { radius: 6 })
 
   // Draw fx'(x)
-  fx2.drawPoint(x, der, int2Ctx, { color, radius: 6 })
+  drawFxPoint(int2Ctx, fx2, x, der, { color, radius: 6 })
 }
