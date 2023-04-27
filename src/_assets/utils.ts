@@ -1,9 +1,9 @@
 export function displayAlert(problem: string) {
   let error = 'Errore sconosciuto'
   switch (problem) {
-    case 'axes_integral':
+    case 'x-range-not-symmetric':
       error =
-        'Attenzione! X minimo e massimo sono errati: Xmin maggiore di Xmax e/o Xmin e Xmax diversi in valore assoluto.'
+        'Attenzione! Xmin e Xmax diversi in valore assoluto: il range delle X deve essere simmetrico.'
       break
     case 'function':
       error =
