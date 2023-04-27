@@ -95,7 +95,7 @@ export function init() {
   fx.drawFxPoints(fxCtx)
 
   const fx2 = new FxChart(func, xMin, xMax, yMin2, yMax2, resolution)
-  fx.drawFxAxes(fxCtx2)
+  fx2.drawFxAxes(fxCtx2)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
