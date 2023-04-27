@@ -161,7 +161,6 @@ export class FxChart {
       currentXStep += xStep
     }
 
-    debugger;
     orderOfMagnitude = Math.floor(Math.log10(this.yInterval))
     let yStep = null;
     if (orderOfMagnitude > 0) {
