@@ -122,7 +122,7 @@ export function init() {
   }, 10)
 }
 
-function drawAnimation(animationPx: number) {
+function drawAnimation(frame: number) {
   {
     const fx2Canvas: HTMLCanvasElement = document.querySelector('#fx2')!
     const fx2Ctx = fx2Canvas.getContext('2d')!
@@ -144,8 +144,9 @@ function drawAnimation(animationPx: number) {
       fx.evaluate()
     }
 
+    const framePx = frame + (fx.domain?.[0]?.from || 0)
     if (
-      animationPx >= (fx.domain![fx.domain!.length - 1]!.to || ctx.canvas.width)
+      framePx >= (fx.domain![fx.domain!.length - 1]!.to || ctx.canvas.width)
     ) {
       const startAnimationBtn: HTMLButtonElement =
         document.querySelector('#start')!
@@ -170,7 +171,7 @@ function drawAnimation(animationPx: number) {
     const positiveColor = 'rgb(0, 128, 255)'
     const negativeColor = 'rgb(255, 51, 51)'
 
-    const x = fx.XFromPx(animationPx)
+    const x = fx.XFromPx(framePx)
     const eps = fx.xInterval * 1e-10
     // https://en.wikipedia.org/wiki/Differentiation_rules
     const der = (evaluate(fx.fx, { x: x + eps }) - evaluate(fx.fx, { x })) / eps
@@ -186,7 +187,7 @@ function drawAnimation(animationPx: number) {
     ctx.lineTo(fx.XToPx((fx.yMax - q) / m), 0)
     ctx.stroke()
     // Draw fx(x)
-    fx.drawPoint(x, fx.points![animationPx]![1]!, ctx, { radius: 6 })
+    fx.drawPoint(x, fx.points![framePx]![1]!, ctx, { radius: 6 })
 
     // Draw fx'(x)
     fx2.drawPoint(x, der, fx2Ctx, { color, radius: 2 })

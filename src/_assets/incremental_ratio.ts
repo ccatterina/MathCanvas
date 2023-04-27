@@ -103,7 +103,7 @@ export function init() {
   }, 10)
 }
 
-export function drawAnimation(animationPx: number) {
+export function drawAnimation(frame: number) {
   const animCanvas: HTMLCanvasElement = document.querySelector('#animation')!
   const buffCanvas: HTMLCanvasElement = document.querySelector('#buffer')!
 
@@ -121,7 +121,8 @@ export function drawAnimation(animationPx: number) {
   const xConversionFactor = ctx.canvas.width / fx.xInterval
   const animationInterval = Math.abs(xFixed - xMoving)
 
-  if (animationPx >= animationInterval * xConversionFactor) {
+  const framePx = frame + (fx.domain?.[0]?.from || 0)
+  if (framePx >= animationInterval * xConversionFactor) {
     const startAnimationBtn: HTMLButtonElement =
       document.querySelector('#start')!
     startAnimationBtn.disabled = false
@@ -142,13 +143,13 @@ export function drawAnimation(animationPx: number) {
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
-  const shift = animationPx / xConversionFactor
+  const shift = framePx / xConversionFactor
   xMoving = xFixed < xMoving ? xMoving - shift : xMoving + shift
   const yFixed = evaluate(fx.fx, { x: xFixed })
   const yMoving = evaluate(fx.fx, { x: xMoving })
 
   const newInterval = Math.abs(xFixed - xMoving)
-  let r = Math.round((animationPx / (newInterval * xConversionFactor)) * 255)
+  let r = Math.round((framePx / (newInterval * xConversionFactor)) * 255)
   const color = `rgb(${r}, 10, 100)`
 
   drawLineBetweeen(fx, xFixed, yFixed, xMoving, yMoving, ctx, { color })
