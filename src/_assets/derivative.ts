@@ -18,13 +18,14 @@ export function derivativeMinMax(fx: FxChart): [number, number] {
   const domPiecesMinMax: [number, number][] = fx.domain!.map((dom) => {
     let min = Infinity
     let max = -Infinity
-    const fromPx = fx.XToPx(dom.from || fx.xMin)
-    const toPx = fx.XToPx(dom.to || fx.xMax)
-    for (let x_px = fromPx; x_px <= toPx; x_px++) {
-      const x = fx.XFromPx(x_px, ctx)
+    for (let x_px = dom.from; x_px <= dom.to; x_px++) {
+      const x = fx.XFromPx(x_px)
       const eps = fx.xInterval * 1e-10
       // https://en.wikipedia.org/wiki/Differentiation_rules
       const d = (evaluate(fx.fx, { x: x + eps }) - evaluate(fx.fx, { x })) / eps
+      if (!isFinite(d) || isNaN(d)) {
+        continue
+      }
       min = Math.min(min, d)
       max = Math.max(max, d)
     }

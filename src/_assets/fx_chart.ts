@@ -1,6 +1,6 @@
 import { evaluate } from 'mathjs'
 
-export type Domain = { from: number | null; to?: number | null }[]
+export type Domain = { from: number; to: number }[]
 
 export class FxChart {
   FONT = '10px Georgia black'
@@ -88,8 +88,6 @@ export class FxChart {
     let isLimited = true
 
     for (let x_px = 0; x_px <= this.resolution[0]; x_px++) {
-      const last_domain_part = domain[domain.length - 1]
-
       const x = (x_px * this.xInterval) / this.resolution[0] + this.xMin
       const y = evaluate(this.fx, { x })
 
@@ -99,13 +97,11 @@ export class FxChart {
         isLimited = false
       }
 
-      if (isNaN(y) && last_domain_part && last_domain_part.from != null) {
-        last_domain_part.to = x_px === this.resolution[0] ? null : x_px
-        continue
-      }
-
-      if (!last_domain_part || last_domain_part.to != null) {
-        domain.push({ from: x_px === 0 ? null : x_px })
+      if (!isNaN(y)) {
+        if (!domain[domain.length - 1]) {
+          domain.push({ from: x_px, to: x_px })
+        }
+        domain[domain.length - 1]!.to = x_px
       }
     }
     this._isLimited = isLimited
