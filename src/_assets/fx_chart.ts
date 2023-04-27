@@ -141,11 +141,13 @@ export class FxChart {
     ctx.stroke()
 
     // Draw x-axis steps
-    let d = -Math.floor(Math.log10(this.xInterval))
-    const xStep =
-      d >= 0
-        ? Math.ceil((this.xInterval / 10) * Math.pow(10, d)) / Math.pow(10, d)
-        : Math.ceil(this.xInterval / (10 * -d))
+    let orderOfMagnitude = Math.floor(Math.log10(this.xInterval))
+    let xStep = null;
+    if (orderOfMagnitude > 0) {
+      xStep = Math.ceil(this.xInterval / (10 * orderOfMagnitude))
+    } else {
+      xStep = Math.ceil((this.xInterval / 10) * Math.pow(10, -orderOfMagnitude)) / Math.pow(10, -orderOfMagnitude)
+    }
 
     // https://math.stackexchange.com/a/3854112
     let currentXStep = xStep * (Math.floor(this.xMin / xStep) + 1)
@@ -154,17 +156,19 @@ export class FxChart {
       ctx.moveTo(currentXStep_px, OrigY_px + 2)
       ctx.lineTo(currentXStep_px, OrigY_px - 2)
       ctx.stroke()
-      ctx.fillText(currentXStep.toString(), currentXStep_px - 4, OrigY_px - 5)
+      ctx.fillText((Math.round(currentXStep * 100) / 100).toString(), currentXStep_px - 4, OrigY_px - 5)
       ctx.fill()
       currentXStep += xStep
     }
 
-    // Draw y-axis steps
-    d = -Math.floor(Math.log10(this.yInterval))
-    const yStep =
-      d >= 0
-        ? Math.ceil((this.yInterval / 10) * Math.pow(10, d)) / Math.pow(10, d)
-        : Math.ceil(this.yInterval / (10 * -d))
+    debugger;
+    orderOfMagnitude = Math.floor(Math.log10(this.yInterval))
+    let yStep = null;
+    if (orderOfMagnitude > 0) {
+      yStep = Math.ceil(this.yInterval / (10 * orderOfMagnitude))
+    } else {
+      yStep = Math.ceil((this.yInterval / 10) * Math.pow(10, -orderOfMagnitude)) / Math.pow(10, -orderOfMagnitude)
+    }
 
     // https://math.stackexchange.com/a/3854112
     let currentYStep = yStep * (Math.floor(this.yMin / yStep) + 1)
@@ -173,7 +177,7 @@ export class FxChart {
       ctx.moveTo(OrigX_px - 2, currentYStep_px)
       ctx.lineTo(OrigX_px + 2, currentYStep_px)
       ctx.stroke()
-      ctx.fillText(currentYStep.toString(), OrigX_px + 5, currentYStep_px - 4)
+      ctx.fillText((Math.round(currentYStep * 100) / 100).toString(), OrigX_px + 5, currentYStep_px - 4)
       ctx.fill()
       currentYStep += yStep
     }
