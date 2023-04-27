@@ -173,7 +173,7 @@ export function drawInteraction(x: number) {
   }
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
-  const xMoving = fx.XFromPx(x, ctx)
+  const xMoving = fx.XFromPx(x)
 
   const yFixed = evaluate(fx.fx, { x: xFixed })
   const yMoving = evaluate(fx.fx, { x: xMoving })
@@ -201,18 +201,18 @@ function drawLineBetweeen(
   ctx.strokeStyle = options.color || 'black'
   ctx.lineWidth = options.lineWidth || 2
   ctx.beginPath()
-  ctx.moveTo(0, fx.YToPx(evaluate(ftan, { x: fx.xMin }), ctx))
-  ctx.lineTo(ctx.canvas.width, fx.YToPx(evaluate(ftan, { x: fx.xMax }), ctx))
+  ctx.moveTo(0, fx.YToPx(evaluate(ftan, { x: fx.xMin })))
+  ctx.lineTo(ctx.canvas.width, fx.YToPx(evaluate(ftan, { x: fx.xMax })))
   ctx.stroke()
   ctx.closePath()
 }
 
 function drawX0OnAxes(X0: number, fx: FxChart, ctx: CanvasRenderingContext2D) {
-  let X0_x = fx.XToPx(X0, ctx)
+  let X0_x = fx.XToPx(X0)
 
   let OrigY_px = ctx.canvas.height - 2 // Origin Y is outside the chart
   if (fx.yMax > 0 && fx.yMin < 0) {
-    OrigY_px = fx.YToPx(0, ctx)
+    OrigY_px = fx.YToPx(0)
   }
 
   ctx.beginPath()

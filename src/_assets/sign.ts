@@ -86,7 +86,7 @@ export function init() {
   fx.evaluate()
 
   if (!manualYAxes || !yMin2 || !yMax2) {
-    const dMinMax = derivativeMinMax(fx, fxCtx2)
+    const dMinMax = derivativeMinMax(fx)
     yMin2 = dMinMax[0] - (dMinMax[1] - dMinMax[0]) / 2
     yMax2 = dMinMax[1] + (dMinMax[1] - dMinMax[0]) / 2
   }
@@ -170,7 +170,7 @@ function drawAnimation(animationPx: number) {
     const positiveColor = 'rgb(0, 128, 255)'
     const negativeColor = 'rgb(255, 51, 51)'
 
-    const x = fx.XFromPx(animationPx, ctx)
+    const x = fx.XFromPx(animationPx)
     const eps = fx.xInterval * 1e-10
     // https://en.wikipedia.org/wiki/Differentiation_rules
     const der = (evaluate(fx.fx, { x: x + eps }) - evaluate(fx.fx, { x })) / eps
@@ -182,8 +182,8 @@ function drawAnimation(animationPx: number) {
     ctx.lineWidth = 2
     const m = der
     const q = evaluate(fx.fx, { x }) - der * x
-    ctx.moveTo(fx.XToPx((fx.yMin - q) / m, ctx), ctx.canvas.height)
-    ctx.lineTo(fx.XToPx((fx.yMax - q) / m, ctx), 0)
+    ctx.moveTo(fx.XToPx((fx.yMin - q) / m), ctx.canvas.height)
+    ctx.lineTo(fx.XToPx((fx.yMax - q) / m), 0)
     ctx.stroke()
     // Draw fx(x)
     fx.drawPoint(x, fx.points![animationPx]![1]!, ctx, { radius: 6 })
@@ -215,7 +215,7 @@ function drawInteraction(x_px: number) {
   const positiveColor = 'rgb(0, 128, 255)'
   const negativeColor = 'rgb(255, 51, 51)'
 
-  const x = fx.XFromPx(x_px, ctx)
+  const x = fx.XFromPx(x_px)
   const eps = fx.xInterval * 1e-10
   // https://en.wikipedia.org/wiki/Differentiation_rules
   const der = (evaluate(fx.fx, { x: x + eps }) - evaluate(fx.fx, { x })) / eps
@@ -228,8 +228,8 @@ function drawInteraction(x_px: number) {
   ctx.lineWidth = 2
   const m = der
   const q = evaluate(fx.fx, { x }) - der * x
-  ctx.moveTo(fx.XToPx((fx.yMin - q) / m, ctx), ctx.canvas.height)
-  ctx.lineTo(fx.XToPx((fx.yMax - q) / m, ctx), 0)
+  ctx.moveTo(fx.XToPx((fx.yMin - q) / m), ctx.canvas.height)
+  ctx.lineTo(fx.XToPx((fx.yMax - q) / m), 0)
   ctx.stroke()
 
   // Draw fx(x)

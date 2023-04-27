@@ -127,7 +127,7 @@ export class FxChart {
     // Calculate Origin y-coordinate position in px.
     let OrigY_px = ctx.canvas.height - 2 // Origin Y is outside the chart
     if (this.yMax > 0 && this.yMin < 0) {
-      OrigY_px = this.YToPx(0, ctx)
+      OrigY_px = this.YToPx(0)
     }
     // Draw x-axis
     ctx.moveTo(0, OrigY_px)
@@ -137,7 +137,7 @@ export class FxChart {
     // Calculate Origin x-coordinate position in px.
     let OrigX_px = 2 // Origin X is outside the chart
     if (this.xMax > 0 && this.xMin < 0) {
-      OrigX_px = this.XToPx(0, ctx)
+      OrigX_px = this.XToPx(0)
     }
     // Draw y-axis
     ctx.moveTo(OrigX_px, 0)
@@ -154,7 +154,7 @@ export class FxChart {
     // https://math.stackexchange.com/a/3854112
     let currentXStep = xStep * (Math.floor(this.xMin / xStep) + 1)
     while (currentXStep < this.xMax) {
-      const currentXStep_px = this.XToPx(currentXStep, ctx)
+      const currentXStep_px = this.XToPx(currentXStep)
       ctx.moveTo(currentXStep_px, OrigY_px + 2)
       ctx.lineTo(currentXStep_px, OrigY_px - 2)
       ctx.stroke()
@@ -173,7 +173,7 @@ export class FxChart {
     // https://math.stackexchange.com/a/3854112
     let currentYStep = yStep * (Math.floor(this.yMin / yStep) + 1)
     while (currentYStep < this.yMax) {
-      const currentYStep_px = this.YToPx(currentYStep, ctx)
+      const currentYStep_px = this.YToPx(currentYStep)
       ctx.moveTo(OrigX_px - 2, currentYStep_px)
       ctx.lineTo(OrigX_px + 2, currentYStep_px)
       ctx.stroke()
@@ -197,7 +197,7 @@ export class FxChart {
       if (isNaN(y)) {
         ctx.beginPath()
         ctx.fillStyle = this.FX_NOT_DEFINED_COLOR
-        ctx.fillRect(this.XToPx(x, ctx), 0, 1, ctx.canvas.height)
+        ctx.fillRect(this.XToPx(x), 0, 1, ctx.canvas.height)
         ctx.fill()
         ctx.closePath()
         continue
@@ -205,7 +205,7 @@ export class FxChart {
 
       ctx.beginPath()
       ctx.fillStyle = this.FX_COLOR
-      ctx.arc(this.XToPx(x, ctx), this.YToPx(y, ctx), 2, 0, 2 * Math.PI)
+      ctx.arc(this.XToPx(x), this.YToPx(y), 2, 0, 2 * Math.PI)
       ctx.fill()
       ctx.closePath()
     }
@@ -222,48 +222,44 @@ export class FxChart {
     const radius = options.radius || 5
     ctx.beginPath()
     ctx.fillStyle = options.color || 'black'
-    ctx.arc(this.XToPx(x, ctx), this.YToPx(y, ctx), radius, sAngle, eAngle)
+    ctx.arc(this.XToPx(x), this.YToPx(y), radius, sAngle, eAngle)
     ctx.fill()
     ctx.closePath()
   }
 
   /**
-   * Get the canvas x-coordinate pixel corresponding to the
+   * Get the x-coordinate pixel corresponding to the function
    * x-value passed by parameter.
    * @param  {number} x [X value]
-   * @param  {CanvasRenderingContext2D} ctx [Canvas context]
    */
-  XToPx(x: number, ctx: CanvasRenderingContext2D) {
-    return ((x - this.xMin) / this.xInterval) * ctx.canvas.width
+  XToPx(x: number) {
+    return ((x - this.xMin) / this.xInterval) * this.resolution[0]
   }
 
   /**
-   * Get the canvas x-value corresponding to the x-coordiante
+   * Get the function x-value corresponding to the x-coordiante
    * in pixel passed by parameter.
    * @param  {number} x_px [X in pixel]
-   * @param  {CanvasRenderingContext2D} ctx [Canvas context]
    */
-  XFromPx(x_px: number, ctx: CanvasRenderingContext2D) {
-    return (x_px * this.xInterval) / ctx.canvas.width + this.xMin
+  XFromPx(x_px: number) {
+    return (x_px * this.xInterval) / this.resolution[0] + this.xMin
   }
 
   /**
-   * Get the canvas y-coordinate pixel corresponding to the
+   * Get the y-coordinate pixel corresponding to the function
    * y-value passed by parameter.
    * @param  {number} y [Y value]
-   * @param  {CanvasRenderingContext2D} ctx [Canvas context]
    */
-  YToPx(y: number, ctx: CanvasRenderingContext2D) {
-    return ((this.yMax - y) / this.yInterval) * ctx.canvas.height
+  YToPx(y: number) {
+    return ((this.yMax - y) / this.yInterval) * this.resolution[1]
   }
 
   /**
-   * Get the canvas y-value corresponding to the y-coordiante
+   * Get the function y-value corresponding to the y-coordiante
    * in pixel passed by parameter.
    * @param  {number} y_px [Y in pixel]
-   * @param  {CanvasRenderingContext2D} ctx [Canvas context]
    */
-  YFromPx(y_px: number, ctx: CanvasRenderingContext2D) {
-    return this.yMax - (y_px * this.yInterval) / ctx.canvas.height
+  YFromPx(y_px: number) {
+    return this.yMax - (y_px * this.yInterval) / this.resolution[1]
   }
 }
