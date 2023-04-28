@@ -93,9 +93,17 @@ export class Fx {
       }
       return domain
     }, [])
-    this._yMin = yMin != undefined ? yMin : Math.min(...this.points.map(([_, y]) => y))
-    this._yMax = yMax != undefined ? yMax : Math.max(...this.points.map(([_, y]) => y))
-    this._yInterval = this.yMax - this.yMin
+    if (yMax != undefined  && yMin != undefined) {
+      this._yMin = yMin
+      this._yMax = yMax
+    } else {
+      const min = Math.min(...this.points.map(([_, y]) => y))
+      const max = Math.max(...this.points.map(([_, y]) => y))
+      const padding = (max - min) > 0 ? (max - min) : 1
+      this._yMin = min - padding 
+      this._yMax = max + padding
+    }
+    this._yInterval = this.yMax - this.yMin 
   }
 
   protected evaluate(): [number, number][] {
@@ -143,5 +151,20 @@ export class Fx {
    */
   YFromPx(y_px: number) {
     return this.yMax - (y_px * this.yInterval) / this.resolution[1]
+  }
+}
+
+
+export class DerivativeFx extends Fx {
+  protected override evaluate(): [number, number][] {
+    const points: [number, number][] = []
+    const eps = this.xInterval * 1e-10
+    for (let x_px = 0; x_px <= this.resolution[0]; x_px++) {
+      const x = this.XFromPx(x_px)
+      const y = (evaluate(this.fx, { x: x + eps }) - evaluate(this.fx, { x })) / eps
+      
+      points.push([x, y])
+    }
+    return points
   }
 }

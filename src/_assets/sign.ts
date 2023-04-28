@@ -1,7 +1,6 @@
 import { displayAlert } from './utils'
-import { Fx } from './fx'
+import { DerivativeFx, Fx } from './fx'
 import { evaluate } from 'mathjs'
-import { derivativeMinMax } from './derivative'
 import { drawFxAxes, drawFxPoint, drawFxPoints } from './canvas_utils'
 
 declare global {
@@ -85,16 +84,16 @@ export function init() {
   const resolution: [number, number] = [fxCtx.canvas.width, fxCtx.canvas.height]
   const fx = new Fx(func, resolution, xMin, xMax, yMin, yMax)
 
-  if (!manualYAxes || !yMin2 || !yMax2) {
-    const dMinMax = derivativeMinMax(fx)
-    yMin2 = dMinMax[0] - (dMinMax[1] - dMinMax[0]) / 2
-    yMax2 = dMinMax[1] + (dMinMax[1] - dMinMax[0]) / 2
-  }
-
   drawFxAxes(fxCtx, fx)
   drawFxPoints(fxCtx, fx)
 
-  const fx2 = new Fx(func, resolution, xMin, xMax, yMin2, yMax2)
+  let fx2
+  if (manualYAxes && yMin2 !== undefined && yMin2 !== undefined) {
+    fx2 = new DerivativeFx(func, resolution, xMin, xMax, yMin2, yMax2)
+  } else {
+    fx2 = new DerivativeFx(func, resolution, xMin, xMax)
+  }
+
   drawFxAxes(fxCtx2, fx2)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
@@ -119,7 +118,7 @@ export function init() {
   window.animationTimerId = setInterval(() => {
     count += 1
     drawAnimation(count)
-  }, 10)
+  }, 20)
 }
 
 function drawAnimation(frame: number) {
@@ -168,26 +167,24 @@ function drawAnimation(frame: number) {
     const positiveColor = 'rgb(0, 128, 255)'
     const negativeColor = 'rgb(255, 51, 51)'
 
-    const x = fx.XFromPx(framePx)
-    const eps = fx.xInterval * 1e-10
-    // https://en.wikipedia.org/wiki/Differentiation_rules
-    const der = (evaluate(fx.fx, { x: x + eps }) - evaluate(fx.fx, { x })) / eps
-    const color = der >= 0 ? positiveColor : negativeColor
+    const [x, y] = fx2.points[framePx]!
+    const color = y >= 0 ? positiveColor : negativeColor
 
     // Draw tangent line to fx at x
     ctx.beginPath()
     ctx.strokeStyle = color
     ctx.lineWidth = 2
-    const m = der
-    const q = evaluate(fx.fx, { x }) - der * x
+    const m = y
+    const q = evaluate(fx.fx, { x }) - y * x
     ctx.moveTo(fx.XToPx((fx.yMin - q) / m), ctx.canvas.height)
     ctx.lineTo(fx.XToPx((fx.yMax - q) / m), 0)
     ctx.stroke()
+
     // Draw fx(x)
     drawFxPoint(ctx, fx, x, fx.points![framePx]![1]!, { radius: 6 })
 
     // Draw fx'(x)
-    drawFxPoint(fx2Ctx, fx2, x, der, { color, radius: 2 })
+    drawFxPoint(fx2Ctx, fx2, x, y, { color, radius: 2 })
 
     animCanvas.classList.toggle('invisible')
     bufferCanvas.classList.toggle('invisible')
@@ -213,19 +210,15 @@ function drawInteraction(x_px: number) {
   const positiveColor = 'rgb(0, 128, 255)'
   const negativeColor = 'rgb(255, 51, 51)'
 
-  const x = fx.XFromPx(x_px)
-  const eps = fx.xInterval * 1e-10
-  // https://en.wikipedia.org/wiki/Differentiation_rules
-  const der = (evaluate(fx.fx, { x: x + eps }) - evaluate(fx.fx, { x })) / eps
-
-  const color = der >= 0 ? positiveColor : negativeColor
+  const [x, y] = fx2.points[x_px]!
+  const color = y >= 0 ? positiveColor : negativeColor
 
   // Draw tangent line to fx at x
   ctx.beginPath()
   ctx.strokeStyle = color
   ctx.lineWidth = 2
-  const m = der
-  const q = evaluate(fx.fx, { x }) - der * x
+  const m = y
+  const q = evaluate(fx.fx, { x }) - y * x
   ctx.moveTo(fx.XToPx((fx.yMin - q) / m), ctx.canvas.height)
   ctx.lineTo(fx.XToPx((fx.yMax - q) / m), 0)
   ctx.stroke()
@@ -234,5 +227,5 @@ function drawInteraction(x_px: number) {
   drawFxPoint(ctx, fx, x, fx.points![x_px]![1]!, { radius: 6 })
 
   // Draw fx'(x)
-  drawFxPoint(int2Ctx, fx2, x, der, { color, radius: 6 })
+  drawFxPoint(int2Ctx, fx2, x, y, { color, radius: 6 })
 }
