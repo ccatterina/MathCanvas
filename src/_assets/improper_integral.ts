@@ -1,7 +1,7 @@
 import { displayAlert } from './utils'
 import { Fx, ImproperIntegralFx } from './fx'
 import { evaluate } from 'mathjs'
-import { drawFxAxes, drawFxPoint, drawFxPoints } from './canvas_utils'
+import { drawFxAxes, drawFxPoints, drawLineSegment } from './canvas_utils'
 
 declare global {
   interface Window {
@@ -118,7 +118,7 @@ function drawAnimation(frame: number, speed: string) {
     const color = `rgb(0,128,255)`
 
     const pxForward = fx.resolution[0] / 2 + framePx
-    const [xForward, yForward] = fx.points[pxForward]!
+    const [_, yForward] = fx.points[pxForward]!
 
     ctx.beginPath()
 
@@ -150,7 +150,9 @@ function drawAnimation(frame: number, speed: string) {
     ctx.fill()
 
     if (fx2.points[framePx]![1] != null) {
-      drawFxPoint(fx2Ctx, fx2, xForward, fx2.points[framePx]![1], { color, radius: 2 })
+      drawLineSegment(fx2Ctx, fx2, fx2.points[framePx - 1] || [NaN, NaN], fx2.points[framePx]!, {
+        color
+      })
     }
   }
 }

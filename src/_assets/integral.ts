@@ -1,7 +1,7 @@
 import { displayAlert } from './utils'
 import { Fx, IntegralFx } from './fx'
 import { evaluate } from 'mathjs'
-import { drawFxAxes, drawFxPoint, drawFxPoints } from './canvas_utils'
+import { drawFxAxes, drawFxPoints, drawLineSegment } from './canvas_utils'
 
 declare global {
   interface Window {
@@ -118,6 +118,6 @@ function drawAnimation(frame: number) {
     ctx.fillRect(framePx, OrigY_px, 2, -(y * fx.resolution[1]) / fx.yInterval)
     ctx.fill()
 
-    drawFxPoint(fx2Ctx, fx2, x, fx2.points![framePx]![1], { color, radius: 2 })
+    drawLineSegment(fx2Ctx, fx2, fx2.points[framePx - 1] || [NaN, NaN], [x, y], { color })
   }
 }

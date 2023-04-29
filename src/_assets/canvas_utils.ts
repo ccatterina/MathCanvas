@@ -98,7 +98,8 @@ export function drawFxPoints(ctx: CanvasRenderingContext2D, fx: Fx) {
     throw Error('Fx resolution must be equal to canvas resolution.')
   }
 
-  for (const [x, y] of fx.points) {
+  for (let i = 1; i < fx.points.length; i++) {
+    const [x, y] = fx.points[i]!
     if (isNaN(y)) {
       ctx.beginPath()
       ctx.fillStyle = FX_NOT_DEFINED_COLOR
@@ -108,12 +109,35 @@ export function drawFxPoints(ctx: CanvasRenderingContext2D, fx: Fx) {
       continue
     }
 
-    ctx.beginPath()
-    ctx.fillStyle = FX_COLOR
-    ctx.arc(fx.XToPx(x), fx.YToPx(y), 2, 0, 2 * Math.PI)
-    ctx.fill()
-    ctx.closePath()
+    drawLineSegment(ctx, fx, fx.points[i - 1]!, [x, y])
   }
+}
+
+/**
+ * Draw a line segment from p0 to p1.
+ * @param  {CanvasRenderingContext2D} ctx [Canvas context]
+ * @param  {Fx} fx [function]
+ */
+export function drawLineSegment(
+  ctx: CanvasRenderingContext2D,
+  fx: Fx,
+  p0: [number, number],
+  p1: [number, number],
+  options: { color?: string; radius?: number } = {}
+) {
+  if (fx.resolution[0] == ctx.canvas.width && fx.resolution[1] != ctx.canvas.height) {
+    throw Error('Fx resolution must be equal to canvas resolution.')
+  }
+  if (isNaN(p0[1]) || isNaN(p1[1])) {
+    return
+  }
+
+  ctx.beginPath()
+  ctx.strokeStyle = options.color || FX_COLOR
+  ctx.lineWidth = options.radius || 2
+  ctx.moveTo(fx.XToPx(p0[0]), fx.YToPx(p0[1]))
+  ctx.lineTo(fx.XToPx(p1[0]), fx.YToPx(p1[1]))
+  ctx.stroke()
 }
 
 /**

@@ -1,6 +1,6 @@
 import { displayAlert } from './utils'
 import { DerivativeFx, Fx } from './fx'
-import { drawFxAxes, drawFxPoint, drawFxPoints } from './canvas_utils'
+import { drawFxAxes, drawFxPoint, drawFxPoints, drawLineSegment } from './canvas_utils'
 import { evaluate } from 'mathjs'
 
 declare global {
@@ -135,12 +135,11 @@ function drawAnimation(frame: number) {
     ctx.moveTo(fx.XToPx((fx.yMin - q) / m), ctx.canvas.height)
     ctx.lineTo(fx.XToPx((fx.yMax - q) / m), 0)
     ctx.stroke()
-    console.log(framePx)
     // Draw fx(x)
     drawFxPoint(ctx, fx, x, fx.points![framePx]![1]!, { radius: 6 })
 
     // Draw fx'(x)
-    drawFxPoint(fx2Ctx, fx2, x, y, { color, radius: 2 })
+    drawLineSegment(fx2Ctx, fx2, fx2.points[framePx - 1] || [NaN, NaN], [x, y], { color })
 
     animCanvas.classList.toggle('invisible')
     bufferCanvas.classList.toggle('invisible')

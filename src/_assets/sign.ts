@@ -1,7 +1,7 @@
 import { displayAlert } from './utils'
 import { DerivativeFx, Fx } from './fx'
 import { evaluate } from 'mathjs'
-import { drawFxAxes, drawFxPoint, drawFxPoints } from './canvas_utils'
+import { drawFxAxes, drawFxPoint, drawFxPoints, drawLineSegment } from './canvas_utils'
 
 declare global {
   interface Window {
@@ -141,7 +141,7 @@ function drawAnimation(frame: number) {
     drawFxPoint(ctx, fx, x, fx.points![framePx]![1]!, { radius: 6 })
 
     // Draw fx'(x)
-    drawFxPoint(fx2Ctx, fx2, x, y, { color, radius: 2 })
+    drawLineSegment(fx2Ctx, fx2, fx2.points[framePx - 1] || [NaN, NaN], [x, y], { color })
 
     animCanvas.classList.toggle('invisible')
     bufferCanvas.classList.toggle('invisible')
