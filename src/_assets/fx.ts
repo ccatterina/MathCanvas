@@ -72,8 +72,9 @@ export class Fx {
     resolution: [number, number],
     xMin: number,
     xMax: number,
-    yMin?: number,
-    yMax?: number
+    yMin: number | undefined = undefined,
+    yMax: number | undefined = undefined,
+    evaluateOptions: Record<string, any> = {}
   ) {
     this._fx = fx
     this._xMin = xMin
@@ -81,9 +82,9 @@ export class Fx {
     this._xInterval = xMax - xMin
     this._resolution = resolution
 
-    this._points = this.evaluate()
-    
-    this._isLimited = this.points.every(([_, y]) => isFinite(y))
+    this._points = this.evaluate(evaluateOptions)
+
+    this._isLimited = this.points.every(([_, y]) => isNaN(y) || isFinite(y))
     this._domain = this.points.reduce((domain: Domain, [x, y]) => {
       if (!isNaN(y)) {
         if (!domain[domain.length - 1]) {
@@ -93,20 +94,21 @@ export class Fx {
       }
       return domain
     }, [])
-    if (yMax != undefined  && yMin != undefined) {
+
+    if (yMax != undefined && yMin != undefined) {
       this._yMin = yMin
       this._yMax = yMax
     } else {
       const min = Math.min(...this.points.map(([_, y]) => y))
       const max = Math.max(...this.points.map(([_, y]) => y))
-      const padding = (max - min) > 0 ? (max - min) : 1
-      this._yMin = min - padding 
+      const padding = (max - min > 0 ? max - min : 1) / 2
+      this._yMin = min - padding
       this._yMax = max + padding
     }
-    this._yInterval = this.yMax - this.yMin 
+    this._yInterval = this.yMax - this.yMin
   }
 
-  protected evaluate(): [number, number][] {
+  protected evaluate(_options: Record<string, any>): [number, number][] {
     const points: [number, number][] = []
 
     for (let x_px = 0; x_px <= this.resolution[0]; x_px++) {
@@ -154,16 +156,72 @@ export class Fx {
   }
 }
 
-
 export class DerivativeFx extends Fx {
-  protected override evaluate(): [number, number][] {
+  protected override evaluate(
+    _options: Record<string, any>
+  ): [number, number][] {
     const points: [number, number][] = []
     const eps = this.xInterval * 1e-10
     for (let x_px = 0; x_px <= this.resolution[0]; x_px++) {
       const x = this.XFromPx(x_px)
-      const y = (evaluate(this.fx, { x: x + eps }) - evaluate(this.fx, { x })) / eps
-      
+      const y =
+        (evaluate(this.fx, { x: x + eps }) - evaluate(this.fx, { x })) / eps
+
       points.push([x, y])
+    }
+    return points
+  }
+}
+
+export class IntegralFx extends Fx {
+  protected override evaluate(
+    _options: Record<string, any>
+  ): [number, number][] {
+    const points: [number, number][] = []
+    let area = 0
+    for (let x_px = 0; x_px <= this.resolution[0]; x_px++) {
+      const x = this.XFromPx(x_px)
+      const y = evaluate(this.fx, { x })
+      if (!isNaN(y)) {
+        area += (this.xInterval / this.resolution[0]) * y
+      }
+      points.push([x, area])
+    }
+    return points
+  }
+}
+
+export class ImproperIntegralFx extends Fx {
+  protected override evaluate(
+    options: Record<string, any>
+  ): [number, number][] {
+    const speed = options?.['speed'] || 'a=-b'
+    const points: [number, number][] = []
+    let area = 0
+    for (let x_px = this.resolution[0] / 2; x_px <= this.resolution[0]; x_px++) {
+      const x = this.XFromPx(x_px)
+      const yForward = evaluate(this.fx, { x })
+      if (!isNaN(yForward)) {
+        area += (this.xInterval / this.resolution[0]) * yForward
+      }
+
+      const xNextPx = this.XFromPx(x_px + 1)
+      let val;
+      if (speed == 'a=-b^2') {
+        // https://en.wikipedia.org/wiki/Trapezoidal_rule
+        val =
+          (Math.abs(Math.pow(x, 2) - Math.pow(xNextPx, 2)) / 2) *
+          (evaluate(this.fx, { x: -Math.pow(xNextPx, 2) }) +
+            evaluate(this.fx, { x: -Math.pow(x, 2) }))
+      } else {
+        val =
+          (this.xInterval / this.resolution[0]) * evaluate(this.fx, { x: -x })
+      }
+      if (!isNaN(val)) {
+        area += val
+      }
+
+      points.push([x, area])
     }
     return points
   }

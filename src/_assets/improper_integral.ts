@@ -1,5 +1,5 @@
 import { displayAlert } from './utils'
-import { Fx } from './fx'
+import { Fx, ImproperIntegralFx } from './fx'
 import { evaluate } from 'mathjs'
 import { drawFxAxes, drawFxPoint, drawFxPoints } from './canvas_utils'
 
@@ -9,30 +9,6 @@ declare global {
     fx2: Fx
     animationTimerId: NodeJS.Timer
   }
-}
-
-export function studyImproperIntegral(fx: Fx, speed: string): Array<number | null> {
-  const values: Array<number | null> = []
-  let area = 0
-  const px0 = fx.XToPx(0)
-  for (let x_px = px0; x_px <= fx.resolution[0]; x_px++) {
-    const x = fx.XFromPx(x_px)
-    const x_plus_1px = fx.XFromPx(x_px + 1)
-    const val = evaluate(fx.fx, { x })
-    if (isNaN(val) || !isFinite(val)) {
-      values.push(null)
-      continue
-    }
-    area += (fx.xInterval / fx.resolution[0]) * val
-    if (speed == "a=-b^2") {
-      area += Math.abs(Math.pow(x, 2) - Math.pow(x_plus_1px, 2)) / 2 * (evaluate(fx.fx, { x: - Math.pow(x_plus_1px, 2) }) + evaluate(fx.fx, { x: - Math.pow(x, 2) }));
-    }
-    else {
-      area += (fx.xInterval / fx.resolution[0]) * evaluate(fx.fx, { x: -x })
-    }
-    values.push(area)
-  }
-  return values
 }
 
 export function init() {
@@ -48,16 +24,19 @@ export function init() {
   const yMax = parseFloat(
     (document.querySelector('#ymax') as HTMLInputElement).value
   )
-  let yMin2 = parseFloat(
+  const yMin2 = parseFloat(
     (document.querySelector('#ymin_2') as HTMLInputElement).value
   )
-  let yMax2 = parseFloat(
+  const yMax2 = parseFloat(
     (document.querySelector('#ymax_2') as HTMLInputElement).value
   )
   const manualYAxes = (
     document.querySelector('#check_man_axes') as HTMLInputElement
   ).checked
-  const speed = (document.getElementById("optionsRadios1") as HTMLInputElement).checked ? (document.querySelector('#optionsRadios1') as HTMLInputElement).value : (document.querySelector('#optionsRadios2') as HTMLInputElement).value
+  const speed = (document.getElementById('optionsRadios1') as HTMLInputElement)
+    .checked
+    ? (document.querySelector('#optionsRadios1') as HTMLInputElement).value
+    : (document.querySelector('#optionsRadios2') as HTMLInputElement).value
 
   const func = (document.querySelector('#function') as HTMLInputElement).value
 
@@ -66,7 +45,7 @@ export function init() {
     return
   }
 
-  if (Math.abs(xMax)!=Math.abs(xMin)) {
+  if (Math.abs(xMax) != Math.abs(xMin)) {
     displayAlert('x-range-not-symmetric')
     return
   }
@@ -107,19 +86,26 @@ export function init() {
     return
   }
 
-  const integralValues = studyImproperIntegral(fx, speed)
-  if (!manualYAxes || !yMin2 || !yMax2) {
-    const min = Math.min(...integralValues.filter(n => n != null) as number[])
-    const max = Math.max(...integralValues.filter(n => n != null) as number[])
-    const interval = (max - min) > 0 ? (max - min) : 1
-    yMin2 = min - interval / 2
-    yMax2 = max + interval / 2
-  }
-
   drawFxAxes(fxCtx, fx)
   drawFxPoints(fxCtx, fx)
 
-  const fx2 = new Fx(func, resolution, xMin, xMax, yMin2, yMax2)
+  let fx2
+  if (manualYAxes && yMin2 !== undefined && yMin2 !== undefined) {
+    fx2 = new ImproperIntegralFx(func, resolution, xMin, xMax, yMin2, yMax2, {
+      speed
+    })
+  } else {
+    fx2 = new ImproperIntegralFx(
+      func,
+      resolution,
+      xMin,
+      xMax,
+      undefined,
+      undefined,
+      { speed }
+    )
+  }
+
   drawFxAxes(fxCtx2, fx2)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
@@ -133,11 +119,11 @@ export function init() {
   let count = -1
   window.animationTimerId = setInterval(() => {
     count += 1
-    drawAnimation(count, integralValues, speed)
+    drawAnimation(count, speed)
   }, 10)
 }
 
-function drawAnimation(frame: number, integralValues: Array<number | null>, speed: string) {
+function drawAnimation(frame: number, speed: string) {
   {
     const fx2Canvas: HTMLCanvasElement = document.querySelector('#fx2')!
     const fx2Ctx = fx2Canvas.getContext('2d')!
@@ -157,9 +143,7 @@ function drawAnimation(frame: number, integralValues: Array<number | null>, spee
     const { fx, fx2 } = window
 
     const framePx = frame + fx.XToPx(fx.domain[0]!.from)
-    if (
-      framePx * 2 >= fx.XToPx(fx.domain![fx.domain!.length - 1]!.to)
-    ) {
+    if (framePx * 2 >= fx.XToPx(fx.domain![fx.domain!.length - 1]!.to)) {
       const startAnimationBtn: HTMLButtonElement =
         document.querySelector('#start')!
       startAnimationBtn.disabled = false
@@ -168,25 +152,23 @@ function drawAnimation(frame: number, integralValues: Array<number | null>, spee
 
     const color = `rgb(0,128,255)`
 
+    const pxForward = fx.resolution[0] / 2 + framePx
+    const [xForward, yForward] = fx.points[pxForward]!
 
-    const pxForward = (fx.resolution[0] / 2) + framePx
-    const [xForward, yForward] = fx.points![pxForward]!
-    
     ctx.beginPath()
 
-    // Draw the area under the function 
+    // Draw the area under the function
     const OrigY_px = fx.Y0_px || fx.resolution[1]
     ctx.fillStyle = color
     const rectHeight = -(yForward * fx.resolution[1]) / fx.yInterval
     ctx.fillRect(pxForward, OrigY_px, 2, rectHeight)
 
-    if (speed != "a=-b^2") {
-      const pxBackward = (fx.resolution[0] / 2) - framePx
+    if (speed != 'a=-b^2') {
+      const pxBackward = fx.resolution[0] / 2 - framePx
       const [_, yBackward] = fx.points![pxBackward]!
       const rectHeight = -(yBackward * fx.resolution[1]) / fx.yInterval
-      ctx.fillRect(pxBackward, OrigY_px, 2, rectHeight);
-    }
-    else {
+      ctx.fillRect(pxBackward, OrigY_px, 2, rectHeight)
+    } else {
       const from = -Math.pow(fx.XFromPx(pxForward), 2)
       const to = -Math.pow(fx.XFromPx(pxForward + 1), 2)
       const fromPx = Math.round(fx.XToPx(from))
@@ -200,11 +182,13 @@ function drawAnimation(frame: number, integralValues: Array<number | null>, spee
       }
     }
 
-    ctx.fill();
+    ctx.fill()
 
-
-    if (integralValues[framePx] != null) {
-      drawFxPoint(fx2Ctx, fx2, xForward, integralValues[framePx] as number, { color, radius: 2 })
+    if (fx2.points[framePx]![1] != null) {
+      drawFxPoint(fx2Ctx, fx2, xForward, fx2.points[framePx]![1], {
+        color,
+        radius: 2
+      })
     }
   }
 }

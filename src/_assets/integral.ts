@@ -1,5 +1,5 @@
 import { displayAlert } from './utils'
-import { Fx } from './fx'
+import { Fx, IntegralFx } from './fx'
 import { evaluate } from 'mathjs'
 import { drawFxAxes, drawFxPoint, drawFxPoints } from './canvas_utils'
 
@@ -9,27 +9,6 @@ declare global {
     fx2: Fx
     animationTimerId: NodeJS.Timer
   }
-}
-
-export function integralMinMax(fx: Fx): [number, number] {
-  let max = -Infinity
-  let min = Infinity
-  let area = 0
-  fx.domain!.forEach((dom) => {
-    const fromPx = fx.XToPx(dom.from || fx.xMin)
-    const toPx = fx.XToPx(dom.to || fx.xMax)
-    for (let x_px = fromPx; x_px <= toPx; x_px++) {
-      const x = fx.XFromPx(x_px)
-      const val = evaluate(fx.fx, { x })
-      if (isNaN(val) || !isFinite(val)) {
-        continue
-      }
-      area += (fx.xInterval / fx.resolution[0]) * evaluate(fx.fx, { x })
-      min = Math.min(min, area)
-      max = Math.max(max, area)
-    }
-  })
-  return [min, max]
 }
 
 export function init() {
@@ -98,16 +77,16 @@ export function init() {
     return
   }
 
-  if (!manualYAxes || !yMin2 || !yMax2) {
-    const dMinMax = integralMinMax(fx)
-    yMin2 = dMinMax[0] - (dMinMax[1] - dMinMax[0]) / 2
-    yMax2 = dMinMax[1] + (dMinMax[1] - dMinMax[0]) / 2
-  }
-
   drawFxAxes(fxCtx, fx)
   drawFxPoints(fxCtx, fx)
 
-  const fx2 = new Fx(func, resolution, xMin, xMax, yMin2, yMax2)
+  let fx2
+  if (manualYAxes && yMin2 !== undefined && yMin2 !== undefined) {
+    fx2 = new IntegralFx(func, resolution, xMin, xMax, yMin2, yMax2)
+  } else {
+    fx2 = new IntegralFx(func, resolution, xMin, xMax)
+  }
+
   drawFxAxes(fxCtx2, fx2)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
@@ -165,14 +144,6 @@ function drawAnimation(frame: number) {
     ctx.fillRect(framePx, OrigY_px, 2, -(y * fx.resolution[1]) / fx.yInterval)
     ctx.fill()
 
-    // Calculate the surface of the area under the function from the beginning of the chart to the `animationPx`.
-    const area = fx.points!.slice(0, framePx).reduce((sum, point) => {
-      if (isNaN(point[1]) || !isFinite(point[1])) {
-        return sum
-      }
-      return sum + point[1] * (fx.xInterval / fx.resolution[0])
-    }, 0)
-
-    drawFxPoint(fx2Ctx, fx2, x, area, { color, radius: 2 })
+    drawFxPoint(fx2Ctx, fx2, x, fx2.points![framePx]![1], { color, radius: 2 })
   }
 }
