@@ -13,12 +13,12 @@ declare global {
 }
 
 export function init() {
-  const xMin = parseFloat((document.querySelector('#xmin') as HTMLInputElement).value)
-  const xMax = parseFloat((document.querySelector('#xmax') as HTMLInputElement).value)
-  const yMin = parseFloat((document.querySelector('#ymin') as HTMLInputElement).value)
-  const yMax = parseFloat((document.querySelector('#ymax') as HTMLInputElement).value)
-  const xFixed = parseFloat((document.querySelector('#xfix') as HTMLInputElement).value)
-  const xMoving = parseFloat((document.querySelector('#xmov') as HTMLInputElement).value)
+  const xMin = Number((document.querySelector('#xmin') as HTMLInputElement).value)
+  const xMax = Number((document.querySelector('#xmax') as HTMLInputElement).value)
+  const yMin = Number((document.querySelector('#ymin') as HTMLInputElement).value)
+  const yMax = Number((document.querySelector('#ymax') as HTMLInputElement).value)
+  const xFixed = Number((document.querySelector('#xfix') as HTMLInputElement).value)
+  const xMoving = Number((document.querySelector('#xmov') as HTMLInputElement).value)
   const func = (document.querySelector('#function') as HTMLInputElement).value
 
   if (yMin < -1000 || xMax > 1000 || yMin < -1000 || yMax > 1000) {
@@ -45,13 +45,9 @@ export function init() {
 
   document.querySelector('#alert')!.classList.add('d-none')
 
-  const fxCanvas: HTMLCanvasElement = document.querySelector('#fx')!
-  const animCanvas: HTMLCanvasElement = document.querySelector('#animation')!
-  const bufferCanvas: HTMLCanvasElement = document.querySelector('#buffer')!
-
-  const fxCtx = fxCanvas.getContext('2d')!
-  const animCtx = animCanvas.getContext('2d')!
-  const bufferCtx = bufferCanvas.getContext('2d')!
+  const fxCtx = (document.querySelector('#fx')! as HTMLCanvasElement).getContext('2d')!
+  const animCtx = (document.querySelector('#animation')! as HTMLCanvasElement).getContext('2d')!
+  const bufferCtx = (document.querySelector('#buffer')! as HTMLCanvasElement).getContext('2d')!
 
   fxCtx.clearRect(0, 0, fxCtx.canvas.width, fxCtx.canvas.height)
   animCtx.clearRect(0, 0, animCtx.canvas.width, animCtx.canvas.height)
@@ -72,6 +68,7 @@ export function init() {
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
 
+  const fxCanvas: HTMLCanvasElement = document.querySelector('#fx')!
   fxCanvas.removeEventListener('mousemove', getCoordinatesAndDrawInteraction, true)
   fxCanvas.removeEventListener('mousedown', getCoordinatesAndDrawInteraction, true)
   clearInterval(window.animationTimerId)
