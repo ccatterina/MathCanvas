@@ -1,5 +1,5 @@
-import "./style/main.scss";
-import "bootstrap";
+import './style/main.scss'
+import 'bootstrap'
 export { Fx } from './fx'
 export * as utils from './utils'
 export { evaluate, parse } from 'mathjs'

@@ -20,27 +20,13 @@ function getCoordinatesAndDrawInteraction(event: MouseEvent) {
 }
 
 export function init() {
-  const xMin = parseFloat(
-    (document.querySelector('#xmin') as HTMLInputElement).value
-  )
-  const xMax = parseFloat(
-    (document.querySelector('#xmax') as HTMLInputElement).value
-  )
-  const yMin = parseFloat(
-    (document.querySelector('#ymin') as HTMLInputElement).value
-  )
-  const yMax = parseFloat(
-    (document.querySelector('#ymax') as HTMLInputElement).value
-  )
-  let yMin2 = parseFloat(
-    (document.querySelector('#ymin_2') as HTMLInputElement).value
-  )
-  let yMax2 = parseFloat(
-    (document.querySelector('#ymax_2') as HTMLInputElement).value
-  )
-  const manualYAxes = (
-    document.querySelector('#check_man_axes') as HTMLInputElement
-  ).checked
+  const xMin = parseFloat((document.querySelector('#xmin') as HTMLInputElement).value)
+  const xMax = parseFloat((document.querySelector('#xmax') as HTMLInputElement).value)
+  const yMin = parseFloat((document.querySelector('#ymin') as HTMLInputElement).value)
+  const yMax = parseFloat((document.querySelector('#ymax') as HTMLInputElement).value)
+  let yMin2 = parseFloat((document.querySelector('#ymin_2') as HTMLInputElement).value)
+  let yMax2 = parseFloat((document.querySelector('#ymax_2') as HTMLInputElement).value)
+  const manualYAxes = (document.querySelector('#check_man_axes') as HTMLInputElement).checked
 
   const func = (document.querySelector('#function') as HTMLInputElement).value
 
@@ -87,29 +73,20 @@ export function init() {
   drawFxAxes(fxCtx, fx)
   drawFxPoints(fxCtx, fx)
 
-
   let fx2
   if (manualYAxes && yMin2 !== undefined && yMin2 !== undefined) {
     fx2 = new DerivativeFx(func, resolution, xMin, xMax, yMin2, yMax2)
   } else {
     fx2 = new DerivativeFx(func, resolution, xMin, xMax)
   }
-  
+
   drawFxAxes(fxCtx2, fx2)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
 
-  fxCanvas.removeEventListener(
-    'mousemove',
-    getCoordinatesAndDrawInteraction,
-    true
-  )
-  fxCanvas.removeEventListener(
-    'mousedown',
-    getCoordinatesAndDrawInteraction,
-    true
-  )
+  fxCanvas.removeEventListener('mousemove', getCoordinatesAndDrawInteraction, true)
+  fxCanvas.removeEventListener('mousedown', getCoordinatesAndDrawInteraction, true)
   clearInterval(window.animationTimerId)
 
   window.fx = fx
@@ -142,24 +119,13 @@ function drawAnimation(frame: number) {
     const { fx, fx2 } = window
 
     const framePx = frame + fx.XToPx(fx.domain[0]!.from)
-    if (
-      framePx >= fx.XToPx(fx.domain![fx.domain!.length - 1]!.to)
-    ) {
-      const startAnimationBtn: HTMLButtonElement =
-        document.querySelector('#start')!
+    if (framePx >= fx.XToPx(fx.domain![fx.domain!.length - 1]!.to)) {
+      const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
       startAnimationBtn.disabled = false
 
       const fxCanvas: HTMLCanvasElement = document.querySelector('#fx')!
-      fxCanvas.addEventListener(
-        'mousemove',
-        getCoordinatesAndDrawInteraction,
-        true
-      )
-      fxCanvas.addEventListener(
-        'mousedown',
-        getCoordinatesAndDrawInteraction,
-        true
-      )
+      fxCanvas.addEventListener('mousemove', getCoordinatesAndDrawInteraction, true)
+      fxCanvas.addEventListener('mousedown', getCoordinatesAndDrawInteraction, true)
       return
     }
 
@@ -169,7 +135,7 @@ function drawAnimation(frame: number) {
     const color = `rgb(${r}, 10, 100)`
 
     const [x, y] = fx2.points[framePx]!
-  
+
     // Draw tangent line to fx at x
     ctx.beginPath()
     ctx.strokeStyle = color

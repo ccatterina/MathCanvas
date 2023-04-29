@@ -13,24 +13,12 @@ declare global {
 }
 
 export function init() {
-  const xMin = parseFloat(
-    (document.querySelector('#xmin') as HTMLInputElement).value
-  )
-  const xMax = parseFloat(
-    (document.querySelector('#xmax') as HTMLInputElement).value
-  )
-  const yMin = parseFloat(
-    (document.querySelector('#ymin') as HTMLInputElement).value
-  )
-  const yMax = parseFloat(
-    (document.querySelector('#ymax') as HTMLInputElement).value
-  )
-  const xFixed = parseFloat(
-    (document.querySelector('#xfix') as HTMLInputElement).value
-  )
-  const xMoving = parseFloat(
-    (document.querySelector('#xmov') as HTMLInputElement).value
-  )
+  const xMin = parseFloat((document.querySelector('#xmin') as HTMLInputElement).value)
+  const xMax = parseFloat((document.querySelector('#xmax') as HTMLInputElement).value)
+  const yMin = parseFloat((document.querySelector('#ymin') as HTMLInputElement).value)
+  const yMax = parseFloat((document.querySelector('#ymax') as HTMLInputElement).value)
+  const xFixed = parseFloat((document.querySelector('#xfix') as HTMLInputElement).value)
+  const xMoving = parseFloat((document.querySelector('#xmov') as HTMLInputElement).value)
   const func = (document.querySelector('#function') as HTMLInputElement).value
 
   if (yMin < -1000 || xMax > 1000 || yMin < -1000 || yMax > 1000) {
@@ -84,16 +72,8 @@ export function init() {
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
 
-  fxCanvas.removeEventListener(
-    'mousemove',
-    getCoordinatesAndDrawInteraction,
-    true
-  )
-  fxCanvas.removeEventListener(
-    'mousedown',
-    getCoordinatesAndDrawInteraction,
-    true
-  )
+  fxCanvas.removeEventListener('mousemove', getCoordinatesAndDrawInteraction, true)
+  fxCanvas.removeEventListener('mousedown', getCoordinatesAndDrawInteraction, true)
   clearInterval(window.animationTimerId)
 
   let count = -1
@@ -123,21 +103,12 @@ export function drawAnimation(frame: number) {
 
   const framePx = frame + fx.XToPx(fx.domain[0]!.from)
   if (framePx >= animationInterval * xConversionFactor) {
-    const startAnimationBtn: HTMLButtonElement =
-      document.querySelector('#start')!
+    const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
     startAnimationBtn.disabled = false
 
     const fxCanvas: HTMLCanvasElement = document.querySelector('#fx')!
-    fxCanvas.addEventListener(
-      'mousemove',
-      getCoordinatesAndDrawInteraction,
-      true
-    )
-    fxCanvas.addEventListener(
-      'mousedown',
-      getCoordinatesAndDrawInteraction,
-      true
-    )
+    fxCanvas.addEventListener('mousemove', getCoordinatesAndDrawInteraction, true)
+    fxCanvas.addEventListener('mousedown', getCoordinatesAndDrawInteraction, true)
     return
   }
 

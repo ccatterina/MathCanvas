@@ -13,8 +13,7 @@ export function displayAlert(problem: string) {
       error = 'Attenzione! X minimo e massimo sono errati.'
       break
     case 'min_max':
-      error =
-        'Attenzione! X/Y minimo e/o massimo superano i limiti di -1000/+1000.'
+      error = 'Attenzione! X/Y minimo e/o massimo superano i limiti di -1000/+1000.'
       break
     case 'xfis_xmob':
       error = 'Attenzione! X0 e/o X non rientrano nel range Xmin-Xmax'

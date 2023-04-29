@@ -12,29 +12,14 @@ declare global {
 }
 
 export function init() {
-  const xMin = parseFloat(
-    (document.querySelector('#xmin') as HTMLInputElement).value
-  )
-  const xMax = parseFloat(
-    (document.querySelector('#xmax') as HTMLInputElement).value
-  )
-  const yMin = parseFloat(
-    (document.querySelector('#ymin') as HTMLInputElement).value
-  )
-  const yMax = parseFloat(
-    (document.querySelector('#ymax') as HTMLInputElement).value
-  )
-  const yMin2 = parseFloat(
-    (document.querySelector('#ymin_2') as HTMLInputElement).value
-  )
-  const yMax2 = parseFloat(
-    (document.querySelector('#ymax_2') as HTMLInputElement).value
-  )
-  const manualYAxes = (
-    document.querySelector('#check_man_axes') as HTMLInputElement
-  ).checked
-  const speed = (document.getElementById('optionsRadios1') as HTMLInputElement)
-    .checked
+  const xMin = parseFloat((document.querySelector('#xmin') as HTMLInputElement).value)
+  const xMax = parseFloat((document.querySelector('#xmax') as HTMLInputElement).value)
+  const yMin = parseFloat((document.querySelector('#ymin') as HTMLInputElement).value)
+  const yMax = parseFloat((document.querySelector('#ymax') as HTMLInputElement).value)
+  const yMin2 = parseFloat((document.querySelector('#ymin_2') as HTMLInputElement).value)
+  const yMax2 = parseFloat((document.querySelector('#ymax_2') as HTMLInputElement).value)
+  const manualYAxes = (document.querySelector('#check_man_axes') as HTMLInputElement).checked
+  const speed = (document.getElementById('optionsRadios1') as HTMLInputElement).checked
     ? (document.querySelector('#optionsRadios1') as HTMLInputElement).value
     : (document.querySelector('#optionsRadios2') as HTMLInputElement).value
 
@@ -95,15 +80,7 @@ export function init() {
       speed
     })
   } else {
-    fx2 = new ImproperIntegralFx(
-      func,
-      resolution,
-      xMin,
-      xMax,
-      undefined,
-      undefined,
-      { speed }
-    )
+    fx2 = new ImproperIntegralFx(func, resolution, xMin, xMax, undefined, undefined, { speed })
   }
 
   drawFxAxes(fxCtx2, fx2)
@@ -144,8 +121,7 @@ function drawAnimation(frame: number, speed: string) {
 
     const framePx = frame + fx.XToPx(fx.domain[0]!.from)
     if (framePx * 2 >= fx.XToPx(fx.domain![fx.domain!.length - 1]!.to)) {
-      const startAnimationBtn: HTMLButtonElement =
-        document.querySelector('#start')!
+      const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
       startAnimationBtn.disabled = false
       return
     }
@@ -185,10 +161,7 @@ function drawAnimation(frame: number, speed: string) {
     ctx.fill()
 
     if (fx2.points[framePx]![1] != null) {
-      drawFxPoint(fx2Ctx, fx2, xForward, fx2.points[framePx]![1], {
-        color,
-        radius: 2
-      })
+      drawFxPoint(fx2Ctx, fx2, xForward, fx2.points[framePx]![1], { color, radius: 2 })
     }
   }
 }

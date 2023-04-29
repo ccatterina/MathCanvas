@@ -157,15 +157,12 @@ export class Fx {
 }
 
 export class DerivativeFx extends Fx {
-  protected override evaluate(
-    _options: Record<string, any>
-  ): [number, number][] {
+  protected override evaluate(_options: Record<string, any>): [number, number][] {
     const points: [number, number][] = []
     const eps = this.xInterval * 1e-10
     for (let x_px = 0; x_px <= this.resolution[0]; x_px++) {
       const x = this.XFromPx(x_px)
-      const y =
-        (evaluate(this.fx, { x: x + eps }) - evaluate(this.fx, { x })) / eps
+      const y = (evaluate(this.fx, { x: x + eps }) - evaluate(this.fx, { x })) / eps
 
       points.push([x, y])
     }
@@ -174,9 +171,7 @@ export class DerivativeFx extends Fx {
 }
 
 export class IntegralFx extends Fx {
-  protected override evaluate(
-    _options: Record<string, any>
-  ): [number, number][] {
+  protected override evaluate(_options: Record<string, any>): [number, number][] {
     const points: [number, number][] = []
     let area = 0
     for (let x_px = 0; x_px <= this.resolution[0]; x_px++) {
@@ -192,9 +187,7 @@ export class IntegralFx extends Fx {
 }
 
 export class ImproperIntegralFx extends Fx {
-  protected override evaluate(
-    options: Record<string, any>
-  ): [number, number][] {
+  protected override evaluate(options: Record<string, any>): [number, number][] {
     const speed = options?.['speed'] || 'a=-b'
     const points: [number, number][] = []
     let area = 0
@@ -206,7 +199,7 @@ export class ImproperIntegralFx extends Fx {
       }
 
       const xNextPx = this.XFromPx(x_px + 1)
-      let val;
+      let val
       if (speed == 'a=-b^2') {
         // https://en.wikipedia.org/wiki/Trapezoidal_rule
         val =
@@ -214,8 +207,7 @@ export class ImproperIntegralFx extends Fx {
           (evaluate(this.fx, { x: -Math.pow(xNextPx, 2) }) +
             evaluate(this.fx, { x: -Math.pow(x, 2) }))
       } else {
-        val =
-          (this.xInterval / this.resolution[0]) * evaluate(this.fx, { x: -x })
+        val = (this.xInterval / this.resolution[0]) * evaluate(this.fx, { x: -x })
       }
       if (!isNaN(val)) {
         area += val
