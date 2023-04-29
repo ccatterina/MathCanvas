@@ -99,8 +99,9 @@ export class Fx {
       this._yMin = yMin
       this._yMax = yMax
     } else {
-      const min = Math.min(...this.points.map(([_, y]) => y))
-      const max = Math.max(...this.points.map(([_, y]) => y))
+      const points = this.points.map(([_, y]) => y).filter((y) => !isNaN(y) && isFinite(y))
+      const min = Math.min(...points)
+      const max = Math.max(...points)
       const padding = (max - min > 0 ? max - min : 1) / 2
       this._yMin = min - padding
       this._yMax = max + padding
