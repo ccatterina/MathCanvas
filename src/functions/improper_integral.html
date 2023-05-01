@@ -26,7 +26,7 @@ instructions: L'animazione mostra come l'integrale improprio su R di una funzion
                 <div id="manual_axes" class="collapse">
                     <label for='ymin_2'>Y-min:</label>
                     <input type='number' id='ymin_2' value='-2.5' step='0.01' class='form-control' min='-1000'>
-                    <label for='ymax_2'>Y-max:</label>"
+                    <label for='ymax_2'>Y-max:</label>
                     <input type='number' id='ymax_2' value='2.5' step='0.01' class='form-control' max='1000'>
                 </div>
                 <br><br>
@@ -53,19 +53,17 @@ instructions: L'animazione mostra come l'integrale improprio su R di una funzion
     </div>
     <div class="col-md-9">
         <div id="fx-canvas-container" style="height: 400px">
-            <canvas id="animation" height="400" class="position-absolute border border-dark"></canvas>
-            <canvas id="buffer" height="400" class="position-absolute border border-dark invisible"></canvas>
-            <canvas id="fx" height="400" class="position-absolute border border-dark"></canvas>
+            <canvas id="fx-layer-0" height="400" class="position-absolute border border-dark"></canvas>
+            <canvas id="fx-layer-1" height="400" class="position-absolute border border-dark"></canvas>
         </div>
         <hr>
         <div id="fx2-canvas-container" style="height: 400px">
-            <canvas id="fx2" height="400" class="position-absolute border border-dark"></canvas>
+            <canvas id="fx2-layer-0" height="400" class="position-absolute border border-dark"></canvas>
         </div>
     </div>
 </div>
 <script>
-    document.querySelector("#animation").width = document.querySelector('#fx-canvas-container').clientWidth
-    document.querySelector("#fx").width = document.querySelector('#fx-canvas-container').clientWidth
-    document.querySelector("#buffer").width = document.querySelector('#fx-canvas-container').clientWidth
-    document.querySelector("#fx2").width = document.querySelector('#fx2-canvas-container').clientWidth
+    document.querySelector("#fx-layer-0").width = document.querySelector('#fx-canvas-container').clientWidth
+    document.querySelector("#fx-layer-1").width = document.querySelector('#fx-canvas-container').clientWidth
+    document.querySelector("#fx2-layer-0").width = document.querySelector('#fx2-canvas-container').clientWidth
 </script>

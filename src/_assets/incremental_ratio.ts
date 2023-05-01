@@ -1,7 +1,13 @@
 import { displayAlert } from './utils'
 import { evaluate } from 'mathjs'
 import { Fx } from './fx'
-import { drawFxAxes, drawFxPoint, drawFxPoints } from './canvas_utils'
+import {
+  drawFxAxes,
+  drawFxPoint,
+  drawFxPoints,
+  drawLineSegment,
+  drawOffscreenAndTransferTo
+} from './canvas_utils'
 
 declare global {
   interface Window {
@@ -45,13 +51,10 @@ export function init() {
 
   document.querySelector('#alert')!.classList.add('d-none')
 
-  const fxCtx = (document.querySelector('#fx')! as HTMLCanvasElement).getContext('2d')!
-  const animCtx = (document.querySelector('#animation')! as HTMLCanvasElement).getContext('2d')!
-  const bufferCtx = (document.querySelector('#buffer')! as HTMLCanvasElement).getContext('2d')!
-
+  const fxCtx = (document.querySelector('#fx-layer-0')! as HTMLCanvasElement).getContext('2d')!
+  const fxFgCtx = (document.querySelector('#fx-layer-1')! as HTMLCanvasElement).getContext('2d')!
   fxCtx.clearRect(0, 0, fxCtx.canvas.width, fxCtx.canvas.height)
-  animCtx.clearRect(0, 0, animCtx.canvas.width, animCtx.canvas.height)
-  bufferCtx.clearRect(0, 0, bufferCtx.canvas.width, bufferCtx.canvas.height)
+  fxFgCtx.clearRect(0, 0, fxFgCtx.canvas.width, fxFgCtx.canvas.height)
 
   const resolution: [number, number] = [fxCtx.canvas.width, fxCtx.canvas.height]
   const fx = new Fx(func, resolution, xMin, xMax, yMin, yMax)
@@ -62,15 +65,14 @@ export function init() {
 
   drawFxAxes(fxCtx, fx)
   drawX0OnAxes(xFixed, fx, fxCtx)
-
   drawFxPoints(fxCtx, fx)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
 
-  const fxCanvas: HTMLCanvasElement = document.querySelector('#fx')!
-  fxCanvas.removeEventListener('mousemove', getCoordinatesAndDrawInteraction, true)
-  fxCanvas.removeEventListener('mousedown', getCoordinatesAndDrawInteraction, true)
+  const fxFgCanvas: HTMLCanvasElement = document.querySelector('#fx-layer-1')!
+  fxFgCanvas.removeEventListener('mousemove', getCoordinatesAndDrawInteraction, true)
+  fxFgCanvas.removeEventListener('mousedown', getCoordinatesAndDrawInteraction, true)
   clearInterval(window.animationTimerId)
 
   let count = -1
@@ -81,80 +83,71 @@ export function init() {
 }
 
 export function drawAnimation(frame: number) {
-  const animCanvas: HTMLCanvasElement = document.querySelector('#animation')!
-  const buffCanvas: HTMLCanvasElement = document.querySelector('#buffer')!
-
   let { fx, xFixed, xMoving } = window
 
-  // To prevent flickering draw the frame on an invisible canvas and
-  // switch visibility when frame is completed.
-  let ctx: CanvasRenderingContext2D
-  if (animCanvas.classList.contains('invisible')) {
-    ctx = animCanvas.getContext('2d')!
-  } else {
-    ctx = buffCanvas.getContext('2d')!
-  }
-
-  const xConversionFactor = ctx.canvas.width / fx.xInterval
-  const animationInterval = Math.abs(xFixed - xMoving)
-
-  const framePx = frame + fx.XToPx(fx.domain[0]!.from)
-  if (framePx >= animationInterval * xConversionFactor) {
+  const animationInterval = Math.abs(fx.XToPx(xFixed) - fx.XToPx(xMoving))
+  if (frame >= animationInterval) {
     const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
     startAnimationBtn.disabled = false
 
-    const fxCanvas: HTMLCanvasElement = document.querySelector('#fx')!
-    fxCanvas.addEventListener('mousemove', getCoordinatesAndDrawInteraction, true)
-    fxCanvas.addEventListener('mousedown', getCoordinatesAndDrawInteraction, true)
+    const fxFgCanvas: HTMLCanvasElement = document.querySelector('#fx-layer-1')!
+    fxFgCanvas.addEventListener('mousemove', getCoordinatesAndDrawInteraction, true)
+    fxFgCanvas.addEventListener('mousedown', getCoordinatesAndDrawInteraction, true)
     return
   }
 
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+  const fxFgCtx = (document.querySelector('#fx-layer-1')! as HTMLCanvasElement).getContext('2d')!
 
-  const shift = framePx / xConversionFactor
+  const shift = frame * (fx.xInterval / fx.resolution[0])
   xMoving = xFixed < xMoving ? xMoving - shift : xMoving + shift
   const yFixed = evaluate(fx.fx, { x: xFixed })
   const yMoving = evaluate(fx.fx, { x: xMoving })
-
-  const newInterval = Math.abs(xFixed - xMoving)
-  let r = Math.round((framePx / (newInterval * xConversionFactor)) * 255)
+  const r = Math.round((frame / Math.abs(fx.XToPx(xFixed) - fx.XToPx(xMoving))) * 255)
   const color = `rgb(${r}, 10, 100)`
 
-  drawLineBetweeen(fx, xFixed, yFixed, xMoving, yMoving, ctx, { color })
-  drawFxPoint(ctx, fx, xMoving, yMoving)
-  drawFxPoint(ctx, fx, xFixed, yFixed)
-
-  animCanvas.classList.toggle('invisible')
-  buffCanvas.classList.toggle('invisible')
+  drawOffscreenAndTransferTo(fxFgCtx, (ctx: CanvasRenderingContext2D) => {
+    if (xMoving != xFixed) {
+      drawLineBetweeen(fx, xFixed, yFixed, xMoving, yMoving, ctx, { color })
+    } else {
+      const eps = fx.xInterval * 1e-10
+      const der = (evaluate(fx.fx, { x: xMoving + eps }) - evaluate(fx.fx, { x: xMoving })) / eps
+      const m = der
+      const q = evaluate(fx.fx, { x: xMoving }) - der * xMoving
+      const p0: [number, number] = [(fx.yMin - q) / m, fx.yMin]
+      const p1: [number, number] = [(fx.yMax - q) / m, fx.yMax]
+      drawLineSegment(ctx, fx, p0, p1, { color })
+    }
+    drawFxPoint(ctx, fx, xMoving, yMoving)
+    drawFxPoint(ctx, fx, xFixed, yFixed)
+  })
 }
 
 export function drawInteraction(x: number) {
-  const animCanvas: HTMLCanvasElement = document.querySelector('#animation')!
-  const buffCanvas: HTMLCanvasElement = document.querySelector('#buffer')!
+  const { fx, xFixed } = window
 
-  let { fx, xFixed } = window
-
-  let ctx: CanvasRenderingContext2D
-  if (animCanvas.classList.contains('invisible')) {
-    ctx = buffCanvas.getContext('2d')!
-  } else {
-    ctx = animCanvas.getContext('2d')!
-  }
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+  const fxFgCtx = (document.querySelector('#fx-layer-1')! as HTMLCanvasElement).getContext('2d')!
 
   const xMoving = fx.XFromPx(x)
-
   const yFixed = evaluate(fx.fx, { x: xFixed })
   const yMoving = evaluate(fx.fx, { x: xMoving })
-
-  const interval = Math.abs(xFixed - xMoving)
-
-  let r = Math.round((1 - interval / (fx.xInterval / 2)) * 255)
+  const r = Math.round((1 - Math.abs(xFixed - xMoving) / (fx.xInterval / 2)) * 255)
   const color = `rgb(${r}, 10, 100)`
 
-  drawLineBetweeen(fx, xFixed, yFixed, xMoving, yMoving, ctx, { color })
-  drawFxPoint(ctx, fx, xMoving, yMoving)
-  drawFxPoint(ctx, fx, xFixed, yFixed)
+  drawOffscreenAndTransferTo(fxFgCtx, (ctx: CanvasRenderingContext2D) => {
+    if (xMoving != xFixed) {
+      drawLineBetweeen(fx, xFixed, yFixed, xMoving, yMoving, ctx, { color })
+    } else {
+      const eps = fx.xInterval * 1e-10
+      const der = (evaluate(fx.fx, { x: xMoving + eps }) - evaluate(fx.fx, { x: xMoving })) / eps
+      const m = der
+      const q = evaluate(fx.fx, { x: xMoving }) - der * xMoving
+      const p0: [number, number] = [(fx.yMin - q) / m, fx.yMin]
+      const p1: [number, number] = [(fx.yMax - q) / m, fx.yMax]
+      drawLineSegment(ctx, fx, p0, p1, { color })
+    }
+    drawFxPoint(ctx, fx, xMoving, yMoving)
+    drawFxPoint(ctx, fx, xFixed, yFixed)
+  })
 }
 
 function drawLineBetweeen(
@@ -166,36 +159,31 @@ function drawLineBetweeen(
   ctx: CanvasRenderingContext2D,
   options: { color?: string; lineWidth?: number } = {}
 ) {
-  let ftan = `(x-(${x0}))/((${x1})-(${x0}))*((${y1})-(${y0}))+(${y0})`
+  const ftan = `(x-(${x0}))/((${x1})-(${x0}))*((${y1})-(${y0}))+(${y0})`
   ctx.strokeStyle = options.color || 'black'
   ctx.lineWidth = options.lineWidth || 2
   ctx.beginPath()
   ctx.moveTo(0, fx.YToPx(evaluate(ftan, { x: fx.xMin })))
   ctx.lineTo(ctx.canvas.width, fx.YToPx(evaluate(ftan, { x: fx.xMax })))
   ctx.stroke()
-  ctx.closePath()
 }
 
 function drawX0OnAxes(X0: number, fx: Fx, ctx: CanvasRenderingContext2D) {
-  let X0_x = fx.XToPx(X0)
-
+  const X0_px = fx.XToPx(X0)
   const OrigY_px = fx.Y0_px || fx.resolution[1] - 2
 
   ctx.beginPath()
   ctx.fillStyle = 'black'
   ctx.font = '12px Georgia'
-  ctx.moveTo(X0_x, OrigY_px + 2)
-  ctx.lineTo(X0_x, OrigY_px - 2)
+  ctx.moveTo(X0_px, OrigY_px + 2)
+  ctx.lineTo(X0_px, OrigY_px - 2)
   ctx.stroke()
-  ctx.beginPath()
-  ctx.fillText('x0', X0_x - 5, OrigY_px + 15)
-  ctx.fill()
+  ctx.fillText('x0', X0_px - 5, OrigY_px + 15)
 }
 
 function getCoordinatesAndDrawInteraction(event: MouseEvent) {
-  const animCanvas: HTMLCanvasElement = document.querySelector('#animation')!
-  var rect = animCanvas.getBoundingClientRect()
+  const fxFgCanvas: HTMLCanvasElement = document.querySelector('#fx-layer-1')!
+  var rect = fxFgCanvas.getBoundingClientRect()
   const x = event.clientX - rect.left
-  // const _y = event.clientY - rect.top
   drawInteraction(x)
 }

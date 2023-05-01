@@ -43,15 +43,12 @@ export function init() {
 
   document.querySelector('#alert')!.classList.add('d-none')
 
-  const fxCtx = (document.querySelector('#fx')! as HTMLCanvasElement).getContext('2d')!
-  const animCtx = (document.querySelector('#animation')! as HTMLCanvasElement).getContext('2d')!
-  const bufferCtx = (document.querySelector('#buffer')! as HTMLCanvasElement).getContext('2d')!
-  const fxCtx2 = (document.querySelector('#fx2')! as HTMLCanvasElement).getContext('2d')!
-
+  const fxCtx = (document.querySelector('#fx-layer-0')! as HTMLCanvasElement).getContext('2d')!
+  const fx2Ctx = (document.querySelector('#fx2-layer-0')! as HTMLCanvasElement).getContext('2d')!
+  const fxFgCtx = (document.querySelector('#fx-layer-1')! as HTMLCanvasElement).getContext('2d')!
   fxCtx.clearRect(0, 0, fxCtx.canvas.width, fxCtx.canvas.height)
-  animCtx.clearRect(0, 0, animCtx.canvas.width, animCtx.canvas.height)
-  bufferCtx.clearRect(0, 0, bufferCtx.canvas.width, bufferCtx.canvas.height)
-  fxCtx2.clearRect(0, 0, fxCtx.canvas.width, fxCtx.canvas.height)
+  fx2Ctx.clearRect(0, 0, fx2Ctx.canvas.width, fx2Ctx.canvas.height)
+  fxFgCtx.clearRect(0, 0, fxFgCtx.canvas.width, fxFgCtx.canvas.height)
 
   const resolution: [number, number] = [fxCtx.canvas.width, fxCtx.canvas.height]
   const fx = new Fx(func, resolution, xMin, xMax, yMin, yMax)
@@ -60,11 +57,11 @@ export function init() {
     return
   }
 
-  drawFxAxes(fxCtx, fx)
-  drawFxPoints(fxCtx, fx)
+  drawFxAxes(fxFgCtx, fx)
+  drawFxPoints(fxFgCtx, fx)
 
   const fx2 = new IntegralFx(func, resolution, xMin, xMax, yMin2, yMax2)
-  drawFxAxes(fxCtx2, fx2)
+  drawFxAxes(fx2Ctx, fx2)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
@@ -82,42 +79,27 @@ export function init() {
 }
 
 function drawAnimation(frame: number) {
-  {
-    const fx2Canvas: HTMLCanvasElement = document.querySelector('#fx2')!
-    const fx2Ctx = fx2Canvas.getContext('2d')!
-
-    const animCanvas: HTMLCanvasElement = document.querySelector('#animation')!
-    const bufferCanvas: HTMLCanvasElement = document.querySelector('#buffer')!
-
-    // To prevent flickering draw the frame on an invisible canvas and
-    // switch visibility when frame is completed.
-    let ctx: CanvasRenderingContext2D
-    if (!animCanvas.classList.contains('invisible')) {
-      ctx = animCanvas.getContext('2d')!
-    } else {
-      ctx = bufferCanvas.getContext('2d')!
-    }
-
-    const { fx, fx2 } = window
-
-    const framePx = frame + fx.XToPx(fx.domain[0]!.from)
-    if (framePx >= fx.XToPx(fx.domain![fx.domain!.length - 1]!.to)) {
-      const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
-      startAnimationBtn.disabled = false
-      return
-    }
-
-    const color = `rgb(0,128,255)`
-
-    const [x, y] = fx.points![framePx]!
-    const OrigY_px = fx.Y0_px || fx.resolution[1]
-
-    // Draw the area under the function
-    ctx.beginPath()
-    ctx.fillStyle = color
-    ctx.fillRect(framePx, OrigY_px, 2, -(y * fx.resolution[1]) / fx.yInterval)
-    ctx.fill()
-
-    drawLineSegment(fx2Ctx, fx2, fx2.points[framePx - 1] || [NaN, NaN], [x, y], { color })
+  const { fx, fx2 } = window
+  const lastDomainPx = fx.XToPx(fx.domain[fx.domain!.length - 1]!.to)
+  const framePx = frame + fx.XToPx(fx.domain[0]!.from)
+  if (framePx >= lastDomainPx) {
+    const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
+    startAnimationBtn.disabled = false
+    return
   }
+
+  const fxCtx = (document.querySelector('#fx-layer-0')! as HTMLCanvasElement).getContext('2d')!
+  const fx2Ctx = (document.querySelector('#fx2-layer-0')! as HTMLCanvasElement).getContext('2d')!
+  const color = `rgb(0,128,255)`
+
+  const [_, y] = fx.points![framePx]!
+  const OrigY_px = fx.Y0_px || fx.resolution[1]
+
+  //Draw the area under the function
+  fxCtx.fillStyle = color
+  fxCtx.fillRect(framePx, OrigY_px, 2, -(y * fx.resolution[1]) / fx.yInterval)
+
+  drawLineSegment(fx2Ctx, fx2, fx2.points[framePx - 1] || [NaN, NaN], fx2.points[framePx]!, {
+    color
+  })
 }

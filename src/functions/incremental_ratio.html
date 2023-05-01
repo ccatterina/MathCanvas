@@ -31,14 +31,12 @@ instructions: L'animazione mostra il concetto di derivata prima come limite del 
     </div>
     <div class="col-md-9">
         <div id="fx-canvas-container" style="height: 400px">
-            <canvas id="animation" height="400" class="position-absolute border border-dark"></canvas>
-            <canvas id="buffer" height="400" class="position-absolute border border-dark invisible"></canvas>
-            <canvas id="fx" height="400" class="position-absolute border border-dark"></canvas>
+            <canvas id="fx-layer-0" height="400" class="position-absolute border border-dark"></canvas>
+            <canvas id="fx-layer-1" height="400" class="position-absolute border border-dark"></canvas>
         </div>
     </div>
 </div>
 <script>
-    document.querySelector("#animation").width = document.querySelector('#fx-canvas-container').clientWidth
-    document.querySelector("#fx").width = document.querySelector('#fx-canvas-container').clientWidth
-    document.querySelector("#buffer").width = document.querySelector('#fx-canvas-container').clientWidth
+    document.querySelector("#fx-layer-0").width = document.querySelector('#fx-canvas-container').clientWidth
+    document.querySelector("#fx-layer-1").width = document.querySelector('#fx-canvas-container').clientWidth
 </script>

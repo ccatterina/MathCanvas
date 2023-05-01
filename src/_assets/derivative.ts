@@ -1,6 +1,12 @@
 import { displayAlert } from './utils'
 import { DerivativeFx, Fx } from './fx'
-import { drawFxAxes, drawFxPoint, drawFxPoints, drawLineSegment } from './canvas_utils'
+import {
+  drawFxAxes,
+  drawFxPoint,
+  drawFxPoints,
+  drawLineSegment,
+  drawOffscreenAndTransferTo
+} from './canvas_utils'
 import { evaluate } from 'mathjs'
 
 declare global {
@@ -12,8 +18,8 @@ declare global {
 }
 
 function getCoordinatesAndDrawInteraction(event: MouseEvent) {
-  const animCanvas: HTMLCanvasElement = document.querySelector('#animation')!
-  var rect = animCanvas.getBoundingClientRect()
+  const fxFgCanvas: HTMLCanvasElement = document.querySelector('#fx-layer-1')!
+  var rect = fxFgCanvas.getBoundingClientRect()
   const x = event.clientX - rect.left
   drawInteraction(x)
 }
@@ -50,17 +56,14 @@ export function init() {
 
   document.querySelector('#alert')!.classList.add('d-none')
 
-  const fxCtx = (document.querySelector('#fx')! as HTMLCanvasElement).getContext('2d')!
-  const animCtx = (document.querySelector('#animation')! as HTMLCanvasElement).getContext('2d')!
-  const bufferCtx = (document.querySelector('#buffer')! as HTMLCanvasElement).getContext('2d')!
-  const fxCtx2 = (document.querySelector('#fx2')! as HTMLCanvasElement).getContext('2d')!
-  const intCtx2 = (document.querySelector('#interaction2')! as HTMLCanvasElement).getContext('2d')!
-
+  const fxCtx = (document.querySelector('#fx-layer-0')! as HTMLCanvasElement).getContext('2d')!
+  const fx2Ctx = (document.querySelector('#fx2-layer-0')! as HTMLCanvasElement).getContext('2d')!
+  const fxFgCtx = (document.querySelector('#fx-layer-1')! as HTMLCanvasElement).getContext('2d')!
+  const fx2FgCtx = (document.querySelector('#fx2-layer-1')! as HTMLCanvasElement).getContext('2d')!
   fxCtx.clearRect(0, 0, fxCtx.canvas.width, fxCtx.canvas.height)
-  animCtx.clearRect(0, 0, animCtx.canvas.width, animCtx.canvas.height)
-  bufferCtx.clearRect(0, 0, bufferCtx.canvas.width, bufferCtx.canvas.height)
-  fxCtx2.clearRect(0, 0, fxCtx.canvas.width, fxCtx.canvas.height)
-  intCtx2.clearRect(0, 0, animCtx.canvas.width, animCtx.canvas.height)
+  fx2Ctx.clearRect(0, 0, fx2Ctx.canvas.width, fx2Ctx.canvas.height)
+  fxFgCtx.clearRect(0, 0, fxFgCtx.canvas.width, fxFgCtx.canvas.height)
+  fx2FgCtx.clearRect(0, 0, fx2FgCtx.canvas.width, fx2FgCtx.canvas.height)
 
   const resolution: [number, number] = [fxCtx.canvas.width, fxCtx.canvas.height]
 
@@ -69,14 +72,14 @@ export function init() {
   drawFxPoints(fxCtx, fx)
 
   const fx2 = new DerivativeFx(func, resolution, xMin, xMax, yMin2, yMax2)
-  drawFxAxes(fxCtx2, fx2)
+  drawFxAxes(fx2Ctx, fx2)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
 
-  const fxCanvas: HTMLCanvasElement = document.querySelector('#fx')!
-  fxCanvas.removeEventListener('mousemove', getCoordinatesAndDrawInteraction, true)
-  fxCanvas.removeEventListener('mousedown', getCoordinatesAndDrawInteraction, true)
+  const fxFgCanvas: HTMLCanvasElement = document.querySelector('#fx-layer-1')!
+  fxFgCanvas.removeEventListener('mousemove', getCoordinatesAndDrawInteraction, true)
+  fxFgCanvas.removeEventListener('mousedown', getCoordinatesAndDrawInteraction, true)
   clearInterval(window.animationTimerId)
 
   window.fx = fx
@@ -90,42 +93,28 @@ export function init() {
 }
 
 function drawAnimation(frame: number) {
-  {
-    const fx2Canvas: HTMLCanvasElement = document.querySelector('#fx2')!
-    const fx2Ctx = fx2Canvas.getContext('2d')!
+  const { fx, fx2 } = window
+  const framePx = frame + fx.XToPx(fx.domain[0]!.from)
+  const lastDomainPx = fx.XToPx(fx.domain[fx.domain!.length - 1]!.to)
+  if (framePx >= lastDomainPx) {
+    const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
+    startAnimationBtn.disabled = false
 
-    const animCanvas: HTMLCanvasElement = document.querySelector('#animation')!
-    const bufferCanvas: HTMLCanvasElement = document.querySelector('#buffer')!
+    const fxFgCanvas: HTMLCanvasElement = document.querySelector('#fx-layer-1')!
+    fxFgCanvas.addEventListener('mousemove', getCoordinatesAndDrawInteraction, true)
+    fxFgCanvas.addEventListener('mousedown', getCoordinatesAndDrawInteraction, true)
+    return
+  }
 
-    // To prevent flickering draw the frame on an invisible canvas and
-    // switch visibility when frame is completed.
-    let ctx: CanvasRenderingContext2D
-    if (animCanvas.classList.contains('invisible')) {
-      ctx = animCanvas.getContext('2d')!
-    } else {
-      ctx = bufferCanvas.getContext('2d')!
-    }
+  const fx2Ctx = (document.querySelector('#fx2-layer-0')! as HTMLCanvasElement).getContext('2d')!
+  const fxFgCtx = (document.querySelector('#fx-layer-1')! as HTMLCanvasElement).getContext('2d')!
 
-    const { fx, fx2 } = window
+  const r = Math.round((framePx / fxFgCtx.canvas.width) * 255)
+  const color = `rgb(${r}, 10, 100)`
 
-    const framePx = frame + fx.XToPx(fx.domain[0]!.from)
-    if (framePx >= fx.XToPx(fx.domain![fx.domain!.length - 1]!.to)) {
-      const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
-      startAnimationBtn.disabled = false
+  const [x, y] = fx2.points[framePx]!
 
-      const fxCanvas: HTMLCanvasElement = document.querySelector('#fx')!
-      fxCanvas.addEventListener('mousemove', getCoordinatesAndDrawInteraction, true)
-      fxCanvas.addEventListener('mousedown', getCoordinatesAndDrawInteraction, true)
-      return
-    }
-
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-
-    let r = Math.round((framePx / ctx.canvas.width) * 255)
-    const color = `rgb(${r}, 10, 100)`
-
-    const [x, y] = fx2.points[framePx]!
-
+  drawOffscreenAndTransferTo(fxFgCtx, (ctx: CanvasRenderingContext2D) => {
     // Draw tangent line to fx at x
     ctx.beginPath()
     ctx.strokeStyle = color
@@ -135,52 +124,40 @@ function drawAnimation(frame: number) {
     ctx.moveTo(fx.XToPx((fx.yMin - q) / m), ctx.canvas.height)
     ctx.lineTo(fx.XToPx((fx.yMax - q) / m), 0)
     ctx.stroke()
-    // Draw fx(x)
+
+    // Draw fx(x) point
     drawFxPoint(ctx, fx, x, fx.points![framePx]![1]!, { radius: 6 })
+  })
 
-    // Draw fx'(x)
-    drawLineSegment(fx2Ctx, fx2, fx2.points[framePx - 1] || [NaN, NaN], [x, y], { color })
-
-    animCanvas.classList.toggle('invisible')
-    bufferCanvas.classList.toggle('invisible')
-  }
+  // Draw fx'
+  drawLineSegment(fx2Ctx, fx2, fx2.points[framePx - 1] || [NaN, NaN], [x, y], { color })
 }
 
 function drawInteraction(x_px: number) {
-  const int2Canv: HTMLCanvasElement = document.querySelector('#interaction2')!
-  const int2Ctx = int2Canv.getContext('2d')!
-  const buffCanvas: HTMLCanvasElement = document.querySelector('#buffer')!
-  const animCanvas: HTMLCanvasElement = document.querySelector('#animation')!
-
-  let { fx, fx2 } = window
-
-  let ctx: CanvasRenderingContext2D
-  if (animCanvas.classList.contains('invisible')) {
-    ctx = buffCanvas.getContext('2d')!
-  } else {
-    ctx = animCanvas.getContext('2d')!
-  }
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-  int2Ctx.clearRect(0, 0, int2Ctx.canvas.width, int2Ctx.canvas.height)
-
-  const r = Math.round((x_px / ctx.canvas.width) * 255)
-  const color = `rgb(${r}, 10, 100)`
+  const fx2FgCtx = (document.querySelector('#fx2-layer-1')! as HTMLCanvasElement).getContext('2d')!
+  const fxFgCtx = (document.querySelector('#fx-layer-1')! as HTMLCanvasElement).getContext('2d')!
+  const { fx, fx2 } = window
 
   const [x, y] = fx2.points[x_px]!
+  const r = Math.round((x_px / fxFgCtx.canvas.width) * 255)
+  const color = `rgb(${r}, 10, 100)`
 
-  // Draw tangent line to fx at x
-  ctx.beginPath()
-  ctx.strokeStyle = color
-  ctx.lineWidth = 2
-  const m = y
-  const q = evaluate(fx.fx, { x }) - y * x
-  ctx.moveTo(fx.XToPx((fx.yMin - q) / m), ctx.canvas.height)
-  ctx.lineTo(fx.XToPx((fx.yMax - q) / m), 0)
-  ctx.stroke()
+  drawOffscreenAndTransferTo(fxFgCtx, (ctx: CanvasRenderingContext2D) => {
+    // Draw tangent line to fx at x
+    ctx.beginPath()
+    ctx.strokeStyle = color
+    ctx.lineWidth = 2
+    const m = y
+    const q = evaluate(fx.fx, { x }) - y * x
+    ctx.moveTo(fx.XToPx((fx.yMin - q) / m), ctx.canvas.height)
+    ctx.lineTo(fx.XToPx((fx.yMax - q) / m), 0)
+    ctx.stroke()
 
-  // Draw fx(x)
-  drawFxPoint(ctx, fx, x, fx.points![x_px]![1]!, { radius: 6 })
+    // Draw fx(x)
+    drawFxPoint(ctx, fx, x, fx.points![x_px]![1]!, { radius: 6 })
+  })
 
   // Draw fx'(x)
-  drawFxPoint(int2Ctx, fx2, x, y, { color, radius: 6 })
+  fx2FgCtx.clearRect(0, 0, fx2FgCtx.canvas.width, fx2FgCtx.canvas.height)
+  drawFxPoint(fx2FgCtx, fx2, x, y, { color, radius: 6 })
 }
