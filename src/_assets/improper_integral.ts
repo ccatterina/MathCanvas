@@ -65,8 +65,8 @@ export function init() {
     return
   }
 
-  drawFxAxes(fxCtx, fx)
-  drawFxPoints(fxCtx, fx)
+  drawFxAxes(fxFgCtx, fx)
+  drawFxPoints(fxFgCtx, fx)
 
   const fx2 = new ImproperIntegralFx(func, resolution, xMin, xMax, yMin2, yMax2, { speed })
   drawFxAxes(fx2Ctx, fx2)
@@ -96,7 +96,7 @@ function drawAnimation(frame: number, speed: string) {
     return
   }
 
-  const fxFgCtx = (document.querySelector('#fx-layer-1')! as HTMLCanvasElement).getContext('2d')!
+  const fxCtx = (document.querySelector('#fx-layer-0')! as HTMLCanvasElement).getContext('2d')!
   const fx2Ctx = (document.querySelector('#fx2-layer-0')! as HTMLCanvasElement).getContext('2d')!
   const color = `rgb(0,128,255)`
 
@@ -105,15 +105,15 @@ function drawAnimation(frame: number, speed: string) {
 
   // Draw the area under the function
   const OrigY_px = fx.Y0_px || fx.resolution[1]
-  fxFgCtx.fillStyle = color
+  fxCtx.fillStyle = color
   const rectHeight = -(yForward * fx.resolution[1]) / fx.yInterval
-  fxFgCtx.fillRect(pxForward, OrigY_px, 2, rectHeight)
+  fxCtx.fillRect(pxForward, OrigY_px, 2, rectHeight)
 
   if (speed != 'a=-b^2') {
     const pxBackward = fx.resolution[0] / 2 - framePx
     const [_, yBackward] = fx.points![pxBackward]!
     const rectHeight = -(yBackward * fx.resolution[1]) / fx.yInterval
-    fxFgCtx.fillRect(pxBackward, OrigY_px, 2, rectHeight)
+    fxCtx.fillRect(pxBackward, OrigY_px, 2, rectHeight)
   } else {
     const from = -Math.pow(fx.XFromPx(pxForward), 2)
     const to = -Math.pow(fx.XFromPx(pxForward + 1), 2)
@@ -123,7 +123,7 @@ function drawAnimation(frame: number, speed: string) {
       for (let px = fromPx; px >= toPx; px--) {
         const [_, yBackward] = fx.points![px]!
         const rectHeight = -(yBackward * fx.resolution[1]) / fx.yInterval
-        fxFgCtx.fillRect(px, OrigY_px, 2, rectHeight)
+        fxCtx.fillRect(px, OrigY_px, 2, rectHeight)
       }
     }
   }
