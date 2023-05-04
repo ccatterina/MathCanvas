@@ -1,5 +1,6 @@
 import { displayAlert } from './utils'
 import { evaluate } from 'mathjs'
+import config from './config'
 import { Fx } from './fx'
 import {
   drawFxAxes,
@@ -160,8 +161,8 @@ function drawLineBetweeen(
   options: { color?: string; lineWidth?: number } = {}
 ) {
   const ftan = `(x-(${x0}))/((${x1})-(${x0}))*((${y1})-(${y0}))+(${y0})`
-  ctx.strokeStyle = options.color || 'black'
-  ctx.lineWidth = options.lineWidth || 2
+  ctx.strokeStyle = options.color || config.FX_COLOR
+  ctx.lineWidth = options.lineWidth || config.FX_THICKNESS
   ctx.beginPath()
   ctx.moveTo(0, fx.YToPx(evaluate(ftan, { x: fx.xMin })))
   ctx.lineTo(ctx.canvas.width, fx.YToPx(evaluate(ftan, { x: fx.xMax })))
@@ -173,7 +174,7 @@ function drawX0OnAxes(X0: number, fx: Fx, ctx: CanvasRenderingContext2D) {
   const OrigY_px = fx.Y0_px || fx.resolution[1] - 2
 
   ctx.beginPath()
-  ctx.fillStyle = 'black'
+  ctx.fillStyle = config.AXIS_COLOR
   ctx.font = '12px Georgia'
   ctx.moveTo(X0_px, OrigY_px + 2)
   ctx.lineTo(X0_px, OrigY_px - 2)

@@ -1,9 +1,5 @@
 import type { Fx } from './fx'
-
-const FONT = '10px Georgia black'
-const FX_NOT_DEFINED_COLOR = 'rgba(11, 13, 15, 0.3)'
-const FX_COLOR = 'black'
-const FX_LINE_WIDTH = 1
+import config from './config'
 
 /**
  * Draw the cartesian axes of the fx on the canvas
@@ -16,10 +12,10 @@ export function drawFxAxes(ctx: CanvasRenderingContext2D, fx: Fx) {
   }
 
   ctx.beginPath()
-  ctx.fillStyle = FX_COLOR
-  ctx.font = FONT
-  ctx.strokeStyle = FX_COLOR
-  ctx.lineWidth = FX_LINE_WIDTH
+  ctx.fillStyle = config.AXIS_COLOR
+  ctx.font = config.FONT
+  ctx.strokeStyle = config.AXIS_COLOR
+  ctx.lineWidth = config.AXIS_THICKNESS
 
   // Draw x-axis
   const OrigY_px = fx.Y0_px || ctx.canvas.height - 2
@@ -35,7 +31,7 @@ export function drawFxAxes(ctx: CanvasRenderingContext2D, fx: Fx) {
 
   // Draw x-axis steps
   let orderOfMagnitude = Math.floor(Math.log10(fx.xInterval))
-  let xStep = null
+  let xStep: number
   if (orderOfMagnitude > 0) {
     xStep = Math.ceil(fx.xInterval / (10 * orderOfMagnitude))
   } else {
@@ -56,12 +52,11 @@ export function drawFxAxes(ctx: CanvasRenderingContext2D, fx: Fx) {
       currentXStep_px - 4,
       OrigY_px - 5
     )
-    ctx.fill()
     currentXStep += xStep
   }
 
   orderOfMagnitude = Math.floor(Math.log10(fx.yInterval))
-  let yStep = null
+  let yStep: number
   if (orderOfMagnitude > 0) {
     yStep = Math.ceil(fx.yInterval / (10 * orderOfMagnitude))
   } else {
@@ -82,10 +77,8 @@ export function drawFxAxes(ctx: CanvasRenderingContext2D, fx: Fx) {
       OrigX_px + 5,
       currentYStep_px - 4
     )
-    ctx.fill()
     currentYStep += yStep
   }
-  ctx.closePath()
 }
 
 /**
@@ -102,10 +95,8 @@ export function drawFxPoints(ctx: CanvasRenderingContext2D, fx: Fx) {
     const [x, y] = fx.points[i]!
     if (isNaN(y)) {
       ctx.beginPath()
-      ctx.fillStyle = FX_NOT_DEFINED_COLOR
+      ctx.fillStyle = config.FX_NOT_DEFINED_COLOR
       ctx.fillRect(fx.XToPx(x), 0, 1, ctx.canvas.height)
-      ctx.fill()
-      ctx.closePath()
       continue
     }
 
@@ -132,9 +123,8 @@ export function drawLineSegment(
     return
   }
   ctx.beginPath()
-  ctx.strokeStyle = options.color || FX_COLOR
-  ctx.lineWidth = options.radius || 2
-  console.log(ctx)
+  ctx.strokeStyle = options.color || config.FX_COLOR
+  ctx.lineWidth = options.radius || config.FX_THICKNESS
   ctx.moveTo(fx.XToPx(p0[0]), fx.YToPx(p0[1]))
   ctx.lineTo(fx.XToPx(p1[0]), fx.YToPx(p1[1]))
   ctx.stroke()
@@ -166,7 +156,6 @@ export function drawFxPoint(
   ctx.fillStyle = options.color || 'black'
   ctx.arc(fx.XToPx(x), fx.YToPx(y), radius, sAngle, eAngle)
   ctx.fill()
-  ctx.closePath()
 }
 
 /**

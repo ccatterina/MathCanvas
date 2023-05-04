@@ -8,6 +8,7 @@ import {
   drawLineSegment,
   drawOffscreenAndTransferTo
 } from './canvas_utils'
+import config from './config'
 
 declare global {
   interface Window {
@@ -119,7 +120,7 @@ function drawAnimation(frame: number) {
     // Draw tangent line to fx at x
     ctx.beginPath()
     ctx.strokeStyle = color
-    ctx.lineWidth = 2
+    ctx.lineWidth = config.FX_THICKNESS
     const m = y
     const q = evaluate(fx.fx, { x }) - y * x
     ctx.moveTo(fx.XToPx((fx.yMin - q) / m), ctx.canvas.height)
@@ -149,7 +150,7 @@ function drawInteraction(x_px: number) {
     // Draw tangent line to fx at x
     ctx.beginPath()
     ctx.strokeStyle = color
-    ctx.lineWidth = 2
+    ctx.lineWidth = config.FX_THICKNESS
     const m = y
     const q = evaluate(fx.fx, { x }) - y * x
     ctx.moveTo(fx.XToPx((fx.yMin - q) / m), ctx.canvas.height)

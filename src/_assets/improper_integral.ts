@@ -11,6 +11,8 @@ declare global {
   }
 }
 
+const INTEGRAL_COLOR = `rgb(0,128,255)`
+
 export function init() {
   const xMin = Number((document.querySelector('#xmin') as HTMLInputElement).value)
   const xMax = Number((document.querySelector('#xmax') as HTMLInputElement).value)
@@ -98,14 +100,13 @@ function drawAnimation(frame: number, speed: string) {
 
   const fxCtx = (document.querySelector('#fx-layer-0')! as HTMLCanvasElement).getContext('2d')!
   const fx2Ctx = (document.querySelector('#fx2-layer-0')! as HTMLCanvasElement).getContext('2d')!
-  const color = `rgb(0,128,255)`
 
   const pxForward = fx.resolution[0] / 2 + framePx
   const [_, yForward] = fx.points[pxForward]!
 
   // Draw the area under the function
   const OrigY_px = fx.Y0_px || fx.resolution[1]
-  fxCtx.fillStyle = color
+  fxCtx.fillStyle = INTEGRAL_COLOR
   const rectHeight = -(yForward * fx.resolution[1]) / fx.yInterval
   fxCtx.fillRect(pxForward, OrigY_px, 2, rectHeight)
 
@@ -130,7 +131,7 @@ function drawAnimation(frame: number, speed: string) {
 
   if (fx2.points[framePx]![1] != null) {
     drawLineSegment(fx2Ctx, fx2, fx2.points[framePx - 1] || [NaN, NaN], fx2.points[framePx]!, {
-      color
+      color: INTEGRAL_COLOR
     })
   }
 }
