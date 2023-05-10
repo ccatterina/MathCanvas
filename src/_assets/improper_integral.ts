@@ -1,12 +1,12 @@
 import { displayAlert } from './utils'
-import { Fx, ImproperIntegralFx } from './fx'
+import { FxChart } from './fx/fx'
+import { ImproperIntegralFxChart } from './fx/improper_integral_fx'
 import { evaluate } from 'mathjs'
-import { drawFxAxes, drawFxPoints, drawLineSegment } from './canvas_utils'
 
 declare global {
   interface Window {
-    fx: Fx
-    fx2: Fx
+    fx: FxChart
+    fx2: FxChart
     animationTimerId: NodeJS.Timer
   }
 }
@@ -61,17 +61,17 @@ export function init() {
   fxFgCtx.clearRect(0, 0, fxFgCtx.canvas.width, fxFgCtx.canvas.height)
 
   const resolution: [number, number] = [fxCtx.canvas.width, fxCtx.canvas.height]
-  const fx = new Fx(func, resolution, xMin, xMax, yMin, yMax)
+  const fx = new FxChart(func, resolution, xMin, xMax, yMin, yMax)
   if (!fx.isLimited) {
     displayAlert('unlimited')
     return
   }
 
-  drawFxAxes(fxFgCtx, fx)
-  drawFxPoints(fxFgCtx, fx)
+  fx.drawAxesOnCanvas(fxFgCtx)
+  fx.drawFxOnCanvas(fxFgCtx)
 
-  const fx2 = new ImproperIntegralFx(func, resolution, xMin, xMax, yMin2, yMax2, { speed })
-  drawFxAxes(fx2Ctx, fx2)
+  const fx2 = new ImproperIntegralFxChart(func, resolution, xMin, xMax, yMin2, yMax2, { speed })
+  fx2.drawAxesOnCanvas(fx2Ctx)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
@@ -130,8 +130,13 @@ function drawAnimation(frame: number, speed: string) {
   }
 
   if (fx2.points[framePx]![1] != null) {
-    drawLineSegment(fx2Ctx, fx2, fx2.points[framePx - 1] || [NaN, NaN], fx2.points[framePx]!, {
-      color: INTEGRAL_COLOR
-    })
+    fx2.drawLineSegmentOnCanvas(
+      fx2Ctx,
+      fx2.points[framePx - 1] || [NaN, NaN],
+      fx2.points[framePx]!,
+      {
+        color: INTEGRAL_COLOR
+      }
+    )
   }
 }

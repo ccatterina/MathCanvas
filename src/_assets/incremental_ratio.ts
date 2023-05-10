@@ -1,18 +1,12 @@
 import { displayAlert } from './utils'
 import { evaluate } from 'mathjs'
 import config from './config'
-import { Fx } from './fx'
-import {
-  drawFxAxes,
-  drawFxPoint,
-  drawFxPoints,
-  drawLineSegment,
-  drawOffscreenAndTransferTo
-} from './canvas_utils'
+import { FxChart } from './fx/fx'
+import { drawOffscreenAndTransferTo } from './canvas_utils'
 
 declare global {
   interface Window {
-    fx: Fx
+    fx: FxChart
     xFixed: number
     xMoving: number
     animationTimerId: NodeJS.Timer
@@ -58,15 +52,15 @@ export function init() {
   fxFgCtx.clearRect(0, 0, fxFgCtx.canvas.width, fxFgCtx.canvas.height)
 
   const resolution: [number, number] = [fxCtx.canvas.width, fxCtx.canvas.height]
-  const fx = new Fx(func, resolution, xMin, xMax, yMin, yMax)
+  const fx = new FxChart(func, resolution, xMin, xMax, yMin, yMax)
 
   window.fx = fx
   window.xFixed = xFixed
   window.xMoving = xMoving
 
-  drawFxAxes(fxCtx, fx)
+  fx.drawAxesOnCanvas(fxCtx)
   drawX0OnAxes(xFixed, fx, fxCtx)
-  drawFxPoints(fxCtx, fx)
+  fx.drawFxOnCanvas(fxCtx)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
@@ -114,12 +108,12 @@ export function drawAnimation(frame: number) {
       const der = (evaluate(fx.fx, { x: xMoving + eps }) - evaluate(fx.fx, { x: xMoving })) / eps
       const m = der
       const q = evaluate(fx.fx, { x: xMoving }) - der * xMoving
-      const p0: [number, number] = [(fx.yMin - q) / m, fx.yMin]
-      const p1: [number, number] = [(fx.yMax - q) / m, fx.yMax]
-      drawLineSegment(ctx, fx, p0, p1, { color })
+      const p0: [number, number] = [(fx.yRangeFrom - q) / m, fx.yRangeFrom]
+      const p1: [number, number] = [(fx.yRangeTo - q) / m, fx.yRangeTo]
+      fx.drawLineSegmentOnCanvas(ctx, p0, p1, { color })
     }
-    drawFxPoint(ctx, fx, xMoving, yMoving)
-    drawFxPoint(ctx, fx, xFixed, yFixed)
+    fx.drawPointOnCanvas(ctx, xMoving, yMoving)
+    fx.drawPointOnCanvas(ctx, xFixed, yFixed)
   })
 }
 
@@ -142,17 +136,17 @@ export function drawInteraction(x: number) {
       const der = (evaluate(fx.fx, { x: xMoving + eps }) - evaluate(fx.fx, { x: xMoving })) / eps
       const m = der
       const q = evaluate(fx.fx, { x: xMoving }) - der * xMoving
-      const p0: [number, number] = [(fx.yMin - q) / m, fx.yMin]
-      const p1: [number, number] = [(fx.yMax - q) / m, fx.yMax]
-      drawLineSegment(ctx, fx, p0, p1, { color })
+      const p0: [number, number] = [(fx.yRangeFrom - q) / m, fx.yRangeFrom]
+      const p1: [number, number] = [(fx.yRangeTo - q) / m, fx.yRangeTo]
+      fx.drawLineSegmentOnCanvas(ctx, p0, p1, { color })
     }
-    drawFxPoint(ctx, fx, xMoving, yMoving)
-    drawFxPoint(ctx, fx, xFixed, yFixed)
+    fx.drawPointOnCanvas(ctx, xMoving, yMoving)
+    fx.drawPointOnCanvas(ctx, xFixed, yFixed)
   })
 }
 
 function drawLineBetweeen(
-  fx: Fx,
+  fx: FxChart,
   x0: number,
   y0: number,
   x1: number,
@@ -169,7 +163,7 @@ function drawLineBetweeen(
   ctx.stroke()
 }
 
-function drawX0OnAxes(X0: number, fx: Fx, ctx: CanvasRenderingContext2D) {
+function drawX0OnAxes(X0: number, fx: FxChart, ctx: CanvasRenderingContext2D) {
   const X0_px = fx.XToPx(X0)
   const OrigY_px = fx.Y0_px || fx.resolution[1] - 2
 

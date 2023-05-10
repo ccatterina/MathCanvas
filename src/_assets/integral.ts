@@ -1,12 +1,12 @@
 import { displayAlert } from './utils'
-import { Fx, IntegralFx } from './fx'
+import { FxChart } from './fx/fx'
+import { IntegralFxChart } from './fx/integral_fx'
 import { evaluate } from 'mathjs'
-import { drawFxAxes, drawFxPoints, drawLineSegment } from './canvas_utils'
 
 declare global {
   interface Window {
-    fx: Fx
-    fx2: Fx
+    fx: FxChart
+    fx2: FxChart
     animationTimerId: NodeJS.Timer
   }
 }
@@ -53,17 +53,17 @@ export function init() {
   fxFgCtx.clearRect(0, 0, fxFgCtx.canvas.width, fxFgCtx.canvas.height)
 
   const resolution: [number, number] = [fxCtx.canvas.width, fxCtx.canvas.height]
-  const fx = new Fx(func, resolution, xMin, xMax, yMin, yMax)
+  const fx = new FxChart(func, resolution, xMin, xMax, yMin, yMax)
   if (!fx.isLimited) {
     displayAlert('unlimited')
     return
   }
 
-  drawFxAxes(fxFgCtx, fx)
-  drawFxPoints(fxFgCtx, fx)
+  fx.drawAxesOnCanvas(fxFgCtx)
+  fx.drawFxOnCanvas(fxFgCtx)
 
-  const fx2 = new IntegralFx(func, resolution, xMin, xMax, yMin2, yMax2)
-  drawFxAxes(fx2Ctx, fx2)
+  const fx2 = new IntegralFxChart(func, resolution, xMin, xMax, yMin2, yMax2)
+  fx2.drawAxesOnCanvas(fx2Ctx)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
@@ -100,7 +100,7 @@ function drawAnimation(frame: number) {
   fxCtx.fillStyle = INTEGRAL_COLOR
   fxCtx.fillRect(framePx, OrigY_px, 2, -(y * fx.resolution[1]) / fx.yInterval)
 
-  drawLineSegment(fx2Ctx, fx2, fx2.points[framePx - 1] || [NaN, NaN], fx2.points[framePx]!, {
+  fx2.drawLineSegmentOnCanvas(fx2Ctx, fx2.points[framePx - 1] || [NaN, NaN], fx2.points[framePx]!, {
     color: INTEGRAL_COLOR
   })
 }

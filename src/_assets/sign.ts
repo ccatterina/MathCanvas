@@ -1,19 +1,14 @@
 import { displayAlert } from './utils'
-import { DerivativeFx, Fx } from './fx'
+import { FxChart } from './fx/fx'
+import { DerivativeFxChart } from './fx/derivative_fx'
 import { evaluate } from 'mathjs'
-import {
-  drawFxAxes,
-  drawFxPoint,
-  drawFxPoints,
-  drawLineSegment,
-  drawOffscreenAndTransferTo
-} from './canvas_utils'
+import { drawOffscreenAndTransferTo } from './canvas_utils'
 import config from './config'
 
 declare global {
   interface Window {
-    fx: Fx
-    fx2: Fx
+    fx: FxChart
+    fx2: FxChart
     animationTimerId: NodeJS.Timer
   }
 }
@@ -68,12 +63,12 @@ export function init() {
 
   const resolution: [number, number] = [fxCtx.canvas.width, fxCtx.canvas.height]
 
-  const fx = new Fx(func, resolution, xMin, xMax, yMin, yMax)
-  drawFxAxes(fxCtx, fx)
-  drawFxPoints(fxCtx, fx)
+  const fx = new FxChart(func, resolution, xMin, xMax, yMin, yMax)
+  fx.drawAxesOnCanvas(fxCtx)
+  fx.drawFxOnCanvas(fxCtx)
 
-  const fx2 = new DerivativeFx(func, resolution, xMin, xMax, yMin2, yMax2)
-  drawFxAxes(fx2Ctx, fx2)
+  const fx2 = new DerivativeFxChart(func, resolution, xMin, xMax, yMin2, yMax2)
+  fx2.drawAxesOnCanvas(fx2Ctx)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
@@ -123,16 +118,16 @@ function drawAnimation(frame: number) {
     ctx.lineWidth = config.FX_THICKNESS
     const m = y
     const q = evaluate(fx.fx, { x }) - y * x
-    ctx.moveTo(fx.XToPx((fx.yMin - q) / m), ctx.canvas.height)
-    ctx.lineTo(fx.XToPx((fx.yMax - q) / m), 0)
+    ctx.moveTo(fx.XToPx((fx.yRangeFrom - q) / m), ctx.canvas.height)
+    ctx.lineTo(fx.XToPx((fx.yRangeTo - q) / m), 0)
     ctx.stroke()
 
     // Draw fx(x)
-    drawFxPoint(ctx, fx, x, fx.points![framePx]![1]!, { radius: 6 })
+    fx.drawPointOnCanvas(ctx, x, fx.points![framePx]![1]!, { radius: 6 })
   })
 
   // Draw fx'(x)
-  drawLineSegment(fx2Ctx, fx2, fx2.points[framePx - 1] || [NaN, NaN], [x, y], { color })
+  fx2.drawLineSegmentOnCanvas(fx2Ctx, fx2.points[framePx - 1] || [NaN, NaN], [x, y], { color })
 }
 
 function drawInteraction(x_px: number) {
@@ -153,15 +148,15 @@ function drawInteraction(x_px: number) {
     ctx.lineWidth = config.FX_THICKNESS
     const m = y
     const q = evaluate(fx.fx, { x }) - y * x
-    ctx.moveTo(fx.XToPx((fx.yMin - q) / m), ctx.canvas.height)
-    ctx.lineTo(fx.XToPx((fx.yMax - q) / m), 0)
+    ctx.moveTo(fx.XToPx((fx.yRangeFrom - q) / m), ctx.canvas.height)
+    ctx.lineTo(fx.XToPx((fx.yRangeTo - q) / m), 0)
     ctx.stroke()
 
     // Draw fx(x)
-    drawFxPoint(ctx, fx, x, fx.points![x_px]![1]!, { radius: 6 })
+    fx.drawPointOnCanvas(ctx, x, fx.points![x_px]![1]!, { radius: 6 })
   })
 
   // Draw fx'(x)
   fx2FgCtx.clearRect(0, 0, fx2FgCtx.canvas.width, fx2FgCtx.canvas.height)
-  drawFxPoint(fx2FgCtx, fx2, x, y, { color, radius: 6 })
+  fx2.drawPointOnCanvas(fx2FgCtx, x, y, { color, radius: 6 })
 }
