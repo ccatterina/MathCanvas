@@ -26,10 +26,6 @@ baseurl: '' # the subpath of your site, e.g. /blog
 url: '' # the base hostname & protocol for your site, e.g. http://example.com
 github_username: ccatterina
 
-# Build settings
-plugins:
-  - jekyll-feed
-
 # Make sure the `_site/assets/` is not trashed (webpack output)
 keep_files:
   - assets
