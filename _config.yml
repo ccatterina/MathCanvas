@@ -35,5 +35,3 @@ keep_files:
   - assets
 
 source: src
-
-assets_base_url: 'assets/'
