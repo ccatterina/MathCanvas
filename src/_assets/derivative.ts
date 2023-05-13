@@ -67,7 +67,7 @@ export function init() {
   fx.drawFxOnCanvas(fxCtx)
 
   const fx2 = new DerivativeFxChart(func, resolution, xMin, xMax, yMin2, yMax2)
-  fx.drawAxesOnCanvas(fx2Ctx)
+  fx2.drawAxesOnCanvas(fx2Ctx)
 
   const startAnimationBtn: HTMLButtonElement = document.querySelector('#start')!
   startAnimationBtn.disabled = true
