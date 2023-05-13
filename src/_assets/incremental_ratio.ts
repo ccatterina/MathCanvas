@@ -179,6 +179,6 @@ function drawX0OnAxes(X0: number, fx: FxChart, ctx: CanvasRenderingContext2D) {
 function getCoordinatesAndDrawInteraction(event: MouseEvent) {
   const fxFgCanvas: HTMLCanvasElement = document.querySelector('#fx-layer-1')!
   var rect = fxFgCanvas.getBoundingClientRect()
-  const x = event.clientX - rect.left
+  const x = Math.floor(event.clientX - rect.left)
   drawInteraction(x)
 }
