@@ -4,6 +4,8 @@ This project aims to facilitate the understanding of the concepts of first deriv
 
 More detailed information about the project can be found in the thesis (italian). (The code presented in the thesis refers to the [first version of the application](https://github.com/ccatterina/MathCanvas/tree/old).)
 
+The webapp is available at https://ccatterina.github.io/MathCanvas
+
 ### Development environment
 
 #### Requirements
