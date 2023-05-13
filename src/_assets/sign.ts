@@ -126,7 +126,7 @@ function drawAnimation(frame: number) {
     fx.drawPointOnCanvas(ctx, x, fx.points![framePx]![1]!, { radius: 6 })
   })
 
-  // Draw fx'(x)
+  // Draw fx'
   fx2.drawLineSegmentOnCanvas(fx2Ctx, fx2.points[framePx - 1] || [NaN, NaN], [x, y], { color })
 }
 

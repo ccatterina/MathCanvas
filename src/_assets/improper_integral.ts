@@ -104,7 +104,7 @@ function drawAnimation(frame: number, speed: string) {
   const pxForward = fx.resolution[0] / 2 + framePx
   const [_, yForward] = fx.points[pxForward]!
 
-  // Draw the area under the function
+  // Draw the area under the function.
   const OrigY_px = fx.Y0_px || fx.resolution[1]
   fxCtx.fillStyle = INTEGRAL_COLOR
   const rectHeight = -(yForward * fx.resolution[1]) / fx.yInterval
@@ -129,6 +129,7 @@ function drawAnimation(frame: number, speed: string) {
     }
   }
 
+  // Draw the integral function on the second canvas.
   if (fx2.points[framePx]![1] != null) {
     fx2.drawLineSegmentOnCanvas(
       fx2Ctx,

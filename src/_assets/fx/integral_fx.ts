@@ -9,6 +9,7 @@ export class IntegralFxChart extends FxChart {
       const x = this.XFromPx(x_px)
       const y = evaluate(this.fx, { x })
       if (!isNaN(y)) {
+        // https://en.wikipedia.org/wiki/Riemann_sum
         area += (this.xInterval / this.resolution[0]) * y
       }
       points.push([x, area])

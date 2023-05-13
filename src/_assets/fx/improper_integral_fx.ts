@@ -10,6 +10,7 @@ export class ImproperIntegralFxChart extends FxChart {
       const x = this.XFromPx(x_px)
       const yForward = evaluate(this.fx, { x })
       if (!isNaN(yForward)) {
+        // https://en.wikipedia.org/wiki/Riemann_sum
         area += (this.xInterval / this.resolution[0]) * yForward
       }
 
@@ -22,6 +23,7 @@ export class ImproperIntegralFxChart extends FxChart {
           (evaluate(this.fx, { x: -Math.pow(xNextPx, 2) }) +
             evaluate(this.fx, { x: -Math.pow(x, 2) }))
       } else {
+        // https://en.wikipedia.org/wiki/Riemann_sum
         val = (this.xInterval / this.resolution[0]) * evaluate(this.fx, { x: -x })
       }
       if (!isNaN(val)) {

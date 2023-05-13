@@ -135,9 +135,8 @@ export class FxChart {
   }
 
   /**
-   * Draw the cartesian axes of the fx on the canvas
+   * Draw the cartesian axes of the fx on the canvas.
    * @param  {CanvasRenderingContext2D} ctx [Canvas context]
-   * @param  {FxChart} fx [function]
    */
   drawAxesOnCanvas(ctx: CanvasRenderingContext2D) {
     this.checkCanvasCtxCompatibility(ctx)
@@ -186,6 +185,7 @@ export class FxChart {
       currentXStep += xStep
     }
 
+    // Draw y-axis steps
     orderOfMagnitude = Math.floor(Math.log10(this.yInterval))
     let yStep: number
     if (orderOfMagnitude > 0) {
@@ -213,7 +213,7 @@ export class FxChart {
   }
 
   /**
-   * Draw the `fx` function on the canvas
+   * Draw the `fx` function on the canvas.
    * @param  {CanvasRenderingContext2D} ctx [Canvas context]
    */
   drawFxOnCanvas(ctx: CanvasRenderingContext2D) {
@@ -233,9 +233,8 @@ export class FxChart {
   }
 
   /**
-   * Draw a line segment from p0 to p1.
+   * Draw a line segment from p0 to p1 on the canvas.
    * @param  {CanvasRenderingContext2D} ctx [Canvas context]
-   * @param  {FxChart} fx [function]
    */
   drawLineSegmentOnCanvas(
     ctx: CanvasRenderingContext2D,
@@ -257,7 +256,7 @@ export class FxChart {
   }
 
   /**
-   * Draw a `fx` point on the canvas
+   * Draw a `fx` point on the canvas.
    * @param  {CanvasRenderingContext2D} ctx [Canvas context]
    * @param  {number} x [x value]
    * @param  {number} y [y value]
