@@ -101,7 +101,7 @@ function drawAnimation(frame: number, speed: string) {
   const fxCtx = (document.querySelector('#fx-layer-0')! as HTMLCanvasElement).getContext('2d')!
   const fx2Ctx = (document.querySelector('#fx2-layer-0')! as HTMLCanvasElement).getContext('2d')!
 
-  const pxForward = fx.resolution[0] / 2 + framePx
+  const pxForward = Math.round(fx.XToPx(0)) + framePx
   const [_, yForward] = fx.points[pxForward]!
 
   // Draw the area under the function.
@@ -111,7 +111,7 @@ function drawAnimation(frame: number, speed: string) {
   fxCtx.fillRect(pxForward, OrigY_px, 2, rectHeight)
 
   if (speed != 'a=-b^2') {
-    const pxBackward = fx.resolution[0] / 2 - framePx
+    const pxBackward = Math.round(fx.XToPx(0)) - framePx
     const [_, yBackward] = fx.points![pxBackward]!
     const rectHeight = -(yBackward * fx.resolution[1]) / fx.yInterval
     fxCtx.fillRect(pxBackward, OrigY_px, 2, rectHeight)
