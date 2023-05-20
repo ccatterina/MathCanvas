@@ -16,7 +16,7 @@ export class FxChart {
   readonly yRangeTo: number
   readonly resolution: [number, number]
   readonly domain: Domain
-  readonly isLimited: Boolean
+  readonly isLimited: boolean
   readonly points: Point[]
 
   get xInterval() {
@@ -42,7 +42,7 @@ export class FxChart {
     xRangeTo: number,
     yRangeFrom: number | undefined = undefined,
     yRangeTo: number | undefined = undefined,
-    evaluateOptions: Record<string, any> = {}
+    evaluateOptions: Record<string, string> = {}
   ) {
     this.fx = fx
     this.resolution = resolution
@@ -81,7 +81,7 @@ export class FxChart {
     }, [])
   }
 
-  protected evaluate(_options: Record<string, any>): Point[] {
+  protected evaluate(_options: Record<string, string>): Point[] {
     const points: [number, number][] = []
 
     for (let x_px = 0; x_px <= this.resolution[0]; x_px++) {

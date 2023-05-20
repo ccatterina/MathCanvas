@@ -8,12 +8,17 @@
   "license": "MIT",
   "devDependencies": {
     "@popperjs/core": "^2.11.6",
+    "@typescript-eslint/eslint-plugin": "^5.59.5",
+    "@typescript-eslint/parser": "^5.59.5",
     "autoprefixer": "^10.4.12",
     "bootstrap": "^5.2.1",
     "concurrently": "^7.4.0",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
     "cssnano": "^5.1.13",
+    "eslint": "^8.40.0",
+    "eslint-plugin-compat": "^4.1.4",
+    "eslint-plugin-html": "^7.1.0",
     "file-loader": "^6.2.0",
     "mathjs": "^11.2.1",
     "mini-css-extract-plugin": "^2.6.1",
@@ -25,6 +30,9 @@
     "rimraf": "^3.0.2",
     "sass": "^1.55.0",
     "sass-loader": "^13.0.2",
+    "stylelint": "^15.6.1",
+    "stylelint-config-standard-scss": "^9.0.0",
+    "stylelint-no-unsupported-browser-features": "^6.1.0",
     "ts-loader": "^9.3.1",
     "typescript": "^4.8.3",
     "webpack": "^5.74.0",
@@ -34,6 +42,13 @@
     "webpack-merge": "^5.8.0"
   },
   "scripts": {
+    "lint:eslint": "eslint src/ --ext .js,.ts",
+    "lint:stylelint": "stylelint src/**/*.{css,scss}",
+    "lint": "npm run lint:eslint && npm run lint:stylelint",
     "dev": "rimraf ./_site && concurrently \"webpack-dev-server --config webpack.dev.js \" \"bundle exec jekyll serve --config _config.yml,_config.dev.yml\""
-  }
+  },
+  "browserslist": [
+    "defaults"
+  ],
+  "dependencies": {}
 }

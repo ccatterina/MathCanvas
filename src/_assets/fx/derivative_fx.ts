@@ -2,7 +2,7 @@ import { evaluate } from 'mathjs'
 import { FxChart, Point } from './fx'
 
 export class DerivativeFxChart extends FxChart {
-  protected override evaluate(_options: Record<string, any>): Point[] {
+  protected override evaluate(_options: Record<string, string>): Point[] {
     const points: Point[] = []
     const eps = this.xInterval * 1e-10
     for (let x_px = 0; x_px <= this.resolution[0]; x_px++) {

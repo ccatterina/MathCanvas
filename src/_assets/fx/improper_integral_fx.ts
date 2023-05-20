@@ -2,7 +2,7 @@ import { evaluate } from 'mathjs'
 import { FxChart, Point } from './fx'
 
 export class ImproperIntegralFxChart extends FxChart {
-  protected override evaluate(options: Record<string, any>): Point[] {
+  protected override evaluate(options: Record<string, string>): Point[] {
     const speed = options?.['speed'] || 'a=-b'
     const points: Point[] = []
     let area = 0
