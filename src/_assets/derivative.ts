@@ -14,7 +14,7 @@ declare global {
 
 function getCoordinatesAndDrawInteraction(event: MouseEvent) {
   const fxFgCanvas: HTMLCanvasElement = document.querySelector('#fx-layer-1')!
-  var rect = fxFgCanvas.getBoundingClientRect()
+  const rect = fxFgCanvas.getBoundingClientRect()
   const x = Math.floor(event.clientX - rect.left)
   drawInteraction(x)
 }

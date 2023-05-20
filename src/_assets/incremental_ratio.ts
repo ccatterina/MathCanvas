@@ -78,7 +78,8 @@ export function init() {
 }
 
 export function drawAnimation(frame: number) {
-  let { fx, xFixed, xMoving } = window
+  const { fx, xFixed } = window
+  let { xMoving } = window
 
   const animationInterval = Math.abs(fx.XToPx(xFixed) - fx.XToPx(xMoving))
   if (frame >= animationInterval) {
@@ -178,7 +179,7 @@ function drawX0OnAxes(X0: number, fx: FxChart, ctx: CanvasRenderingContext2D) {
 
 function getCoordinatesAndDrawInteraction(event: MouseEvent) {
   const fxFgCanvas: HTMLCanvasElement = document.querySelector('#fx-layer-1')!
-  var rect = fxFgCanvas.getBoundingClientRect()
+  const rect = fxFgCanvas.getBoundingClientRect()
   const x = Math.floor(event.clientX - rect.left)
   drawInteraction(x)
 }
