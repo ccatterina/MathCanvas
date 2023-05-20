@@ -12,33 +12,38 @@ slug: home
     Per informazioni più dettagliate sul progetto è possibile consultare la <a href="{{ site.baseurl }}/tesi.pdf">tesi</a>.
     (Il codice presentato nella tesi fa riferimento alla <a href="https://github.com/ccatterina/MathCanvas/tree/old">prima versione dell'applicativo</a>)
 </p>
-<div class="table-responsive">
-    <caption><h3><br>Compatibilita'</h3></caption>
-    <table class="table">
-    <thead>
-        <tr>
-            <th><img src="{{ site.assets_base_url }}/images/ie.png" width="48" heigth="48"></th>
-            <th><img src="{{ site.assets_base_url }}/images/firefox.png" width="48" heigth="48"></th>
-            <th><img src="{{ site.assets_base_url }}/images/opera.png" width="48" heigth="48"></th>
-            <th><img src="{{ site.assets_base_url }}/images/chrome.png" width="48" heigth="48"></th>
-            <th><img src="{{ site.assets_base_url }}/images/safari.png" width="48" heigth="48"></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>9.0</td>
-            <td>2.0</td>
-            <td>9.0</td>
-            <td>4.0</td>
-            <td>3.1</td>
-        </tr>
-        </tbody>
-    </table>
-    <p class="pt-3">
-        Compatibile con dispositivi mobili.
-    </p>
-</div>
-<caption><h3><br>Contribuisci</h3></caption>
+<caption><h3><br>🧑‍🏫 Come utilizzarlo</h3></caption>
+<p>
+    Per ogni animazione è possibile configurare:
+    <ul>
+        <li>La funzione da graficare e animare, le funzioni sono valutate utilizzando il pacchetto <a href="https://mathjs.org/">math.js</a> (riferirsi alla <a href="https://mathjs.org/docs/expressions/syntax.html">documentazione</a> per la sintassi).</li>
+        <li>I range di X e Y del grafico, in caso di doppio grafico è possibile specificare anche il range di Y per il secondo grafico o farlo calcolare automaticamente all'applicativo.</li>
+        <li>Altri dati specifici per l'animazione.</li>
+    </ul>
+</p>
+<p>
+    Una volta completata la configurazione è possibile avviare l'animazione cliccando il pulsante  <i> Disegna e avvia animazione </i>.
+</p>
+<p>
+    Completata l'animazione, per alcuni grafici, è possibile rivedere i frame dell'animazione muovendo il mouse lungo grafico principale.
+</p>
+
+<caption><h3><br>⚠️ Limitazioni note</h3></caption>
+<p>
+    <ul>
+        <li>
+            Le funzioni con un forte gradiente o fortemente oscillanti non sono disegnate in maniera precisa. <br>
+            <i>e.g. sin(x^5) su intervallo X [-5, 5] </i>: <br>
+            <img src="{{ site.assets_base_url }}/images/sinx5_int.png" class="img-fluid" style="padding: 1rem; max-height: 17rem;"></img>
+        </li>
+        <li>
+            Il calcolo automatico del range delle Y per l'eventuale secondo grafico non è sempre preciso quando la funzione da graficare tende ad infinito. Il problema è arginabile settando a mano il range.
+        </li>
+    </ul>
+
+</p>
+
+<caption><h3><br>🚀 Contribuisci</h3></caption>
 <p class="pt-3">
     Il codice sorgente è disponibile su github (<a href="https://github.com/ccatterina/MathCanvas">MathCanvas</a>), puoi contribuire al progetto segnalando un bug o proponendo delle modifiche.
 </p>
