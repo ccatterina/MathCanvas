@@ -1,1 +1,10 @@
 /* Place here custom scss, e.g. bootstrap customizations */
+
+.div-with-collapsable-box {
+    .collapsable-box {
+        display: none;
+    }
+    input[type=checkbox]:checked ~ .collapsable-box{
+        display: block;
+    }
+}
