@@ -46,6 +46,18 @@ export function setInputsValuesFromQueryParams() {
   })
 }
 
+export function setCanvasesDimensions() {
+  document.querySelectorAll('canvas').forEach((canvas: HTMLCanvasElement) => {
+    const parent = canvas.parentElement
+    if (!parent) {
+      return
+    }
+    canvas.width = parent.clientWidth
+    canvas.height = parent.clientWidth / 2
+    parent.setAttribute('style', 'height:' + parent.clientWidth / 2 + 'px')
+  })
+}
+
 export function copyLinkToClipboard() {
   const link = new URL(window.location.href)
   link.search = ''

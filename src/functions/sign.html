@@ -46,19 +46,6 @@ instructions: |
         </div>
     </div>
 </div>
-<script>
-    const fxCanvasWidth =  document.querySelector('#fx-canvas-container').clientWidth
-    const fx2CanvasWidth =  document.querySelector('#fx-canvas-container').clientWidth
-    document.querySelector("#fx-layer-0").width = fxCanvasWidth
-    document.querySelector("#fx-layer-1").width = fxCanvasWidth
-    document.querySelector("#fx2-layer-0").width = fx2CanvasWidth
-    document.querySelector("#fx2-layer-1").width = fx2CanvasWidth
-    document.querySelector("#fx-layer-0").height = fxCanvasWidth / 2
-    document.querySelector("#fx-layer-1").height = fxCanvasWidth / 2
-    document.querySelector("#fx2-layer-0").height = fx2CanvasWidth / 2
-    document.querySelector("#fx2-layer-1").height = fx2CanvasWidth / 2
-    document.querySelector("#fx-canvas-container").setAttribute("style", "height:" + (fxCanvasWidth / 2) + "px")
-    document.querySelector("#fx2-canvas-container").setAttribute("style", "height:" + (fx2CanvasWidth / 2) + "px")
-</script>
+
 
 {% include initialization_script.html %}
