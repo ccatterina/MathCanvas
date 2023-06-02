@@ -8,6 +8,7 @@ instructions: |
 {% include errors_and_instructions.html %}
 <div class="row pt-4 g-3">
     <div class="col-md-3">
+        {% include copy_link.html %}
         <div class="card card-body">
             <div class="form-group" id="form">
                 <label for="function">Funzione:</label>
@@ -37,11 +38,6 @@ instructions: |
         </div>
     </div>
 </div>
-<script>
-    const fxCanvasWidth =  document.querySelector('#fx-canvas-container').clientWidth
-    document.querySelector("#fx-layer-0").width = fxCanvasWidth
-    document.querySelector("#fx-layer-1").width = fxCanvasWidth
-    document.querySelector("#fx-layer-0").height = fxCanvasWidth / 2
-    document.querySelector("#fx-layer-1").height = fxCanvasWidth / 2
-    document.querySelector("#fx-canvas-container").setAttribute("style", "height:" + (fxCanvasWidth / 2) + "px")
-</script>
+
+
+{% include initialization_script.html %}
