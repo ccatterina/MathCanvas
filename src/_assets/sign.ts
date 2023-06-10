@@ -1,4 +1,4 @@
-import { displayAlert } from './utils'
+import { displayAlert, setCoordinatesInBox } from './utils'
 import { FxChart } from './fx/fx'
 import { DerivativeFxChart } from './fx/derivative_fx'
 import { evaluate } from 'mathjs'
@@ -60,6 +60,9 @@ export function init() {
   fx2Ctx.clearRect(0, 0, fx2Ctx.canvas.width, fx2Ctx.canvas.height)
   fxFgCtx.clearRect(0, 0, fxFgCtx.canvas.width, fxFgCtx.canvas.height)
   fx2FgCtx.clearRect(0, 0, fx2FgCtx.canvas.width, fx2FgCtx.canvas.height)
+
+  document.getElementById('fx-coordinates')!.innerText = ''
+  document.getElementById('fx2-coordinates')!.innerText = ''
 
   const resolution: [number, number] = [fxCtx.canvas.width, fxCtx.canvas.height]
 
@@ -154,9 +157,11 @@ function drawInteraction(x_px: number) {
 
     // Draw fx(x)
     fx.drawPointOnCanvas(ctx, x, fx.points![x_px]![1]!, { radius: 6 })
+    setCoordinatesInBox('fx-coordinates', x, fx.points![x_px]![1]!)
   })
 
   // Draw fx'(x)
   fx2FgCtx.clearRect(0, 0, fx2FgCtx.canvas.width, fx2FgCtx.canvas.height)
   fx2.drawPointOnCanvas(fx2FgCtx, x, y, { color, radius: 6 })
+  setCoordinatesInBox('fx2-coordinates', x, y)
 }
