@@ -75,3 +75,8 @@ export function copyLinkToClipboard() {
   const toast = new Toast(toastElement, { delay: 2000 })
   toast.show()
 }
+
+export function setCoordinatesInBox(id: string, x: number, y: number) {
+  const coordinatesBox = document.getElementById(id)!
+  coordinatesBox.innerText = `X: ${x.toFixed(2)}, Y: ${y.toFixed(2)}`
+}
