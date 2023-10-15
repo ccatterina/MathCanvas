@@ -1,6 +1,8 @@
 const path = require('path')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const TerserPlugin = require("terser-webpack-plugin")
+
 
 module.exports = {
   entry: './src/_assets/index.ts',
@@ -9,6 +11,22 @@ module.exports = {
     filename: 'bundle.js',
     libraryTarget: 'var',
     library: 'mathCanvas'
+  },
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          output: {
+            preamble: `/*! Licensing information can be found in COPYING and THIRD_PARTY_NOTICE files */`,
+            comments: false,
+          }
+        },
+        // Extract licensing comments with terser plugin produces an incomplete licensing file.
+        // Disable it in favour of a THIRD_PARTY_NOTICE file that is manually maintained.
+        extractComments: false
+      }),
+    ],
   },
   module: {
     rules: [
