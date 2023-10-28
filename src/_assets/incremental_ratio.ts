@@ -1,4 +1,4 @@
-import { displayAlert } from './utils'
+import { displayAlert, setCoordinatesInBox } from './utils'
 import { evaluate } from 'mathjs'
 import config from './config'
 import { FxChart } from './fx/fx'
@@ -50,6 +50,8 @@ export function init() {
   const fxFgCtx = (document.querySelector('#fx-layer-1')! as HTMLCanvasElement).getContext('2d')!
   fxCtx.clearRect(0, 0, fxCtx.canvas.width, fxCtx.canvas.height)
   fxFgCtx.clearRect(0, 0, fxFgCtx.canvas.width, fxFgCtx.canvas.height)
+
+  document.getElementById('fx-coordinates')!.innerText = ''
 
   const resolution: [number, number] = [fxCtx.canvas.width, fxCtx.canvas.height]
   const fx = new FxChart(func, resolution, xMin, xMax, yMin, yMax)
@@ -143,6 +145,7 @@ export function drawInteraction(x: number) {
     }
     fx.drawPointOnCanvas(ctx, xMoving, yMoving)
     fx.drawPointOnCanvas(ctx, xFixed, yFixed)
+    setCoordinatesInBox('fx-coordinates', xMoving, yMoving)
   })
 }
 
